@@ -1,0 +1,337 @@
+import * as THREE from 'three';
+
+export class ARCardManager {
+  constructor(anchorGroup) {
+    this.anchor = anchorGroup;
+    this.hotspotMeshes = [];
+    this.hologramGroup = new THREE.Group();
+    this.anchor.add(this.hologramGroup);
+
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
+
+    this.cardCanvas = document.createElement('canvas');
+    this.cardCanvas.width = 1024;
+    this.cardCanvas.height = 768;
+    this.cardContext = this.cardCanvas.getContext('2d');
+    this.cardTexture = new THREE.CanvasTexture(this.cardCanvas);
+    this.cardTexture.minFilter = THREE.LinearFilter;
+
+    this.cardMesh = null;
+    this.hotspotGroup = new THREE.Group();
+    this.hologramGroup.add(this.hotspotGroup);
+
+    this.time = 0;
+    this.currentMetadata = null;
+    this.onHotspotClick = null;
+  }
+
+  createHolographicCard(metadata) {
+    this.currentMetadata = metadata;
+    this._renderCardTexture(metadata);
+
+    if (!this.cardMesh) {
+      // Create rounded floating card plane
+      const geometry = new THREE.PlaneGeometry(1.0, 0.75);
+      const material = new THREE.MeshBasicMaterial({
+        map: this.cardTexture,
+        transparent: true,
+        opacity: 0.96,
+        side: THREE.DoubleSide
+      });
+
+      this.cardMesh = new THREE.Mesh(geometry, material);
+      // Position floating above manuscript center
+      this.cardMesh.position.set(0, 0.55, 0.15);
+      this.cardMesh.rotation.x = -Math.PI * 0.12; // tilted towards user
+
+      // Add a subtle glowing wireframe frame
+      const frameGeo = new THREE.PlaneGeometry(1.04, 0.79);
+      const wireframeMat = new THREE.MeshBasicMaterial({
+        color: 0x00d2ff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.4
+      });
+      const frameMesh = new THREE.Mesh(frameGeo, wireframeMat);
+      frameMesh.position.z = -0.005;
+      this.cardMesh.add(frameMesh);
+
+      // Add 3D anchor laser line pointing down to manuscript
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, -0.45, -0.15)
+      ]);
+      const lineMat = new THREE.LineBasicMaterial({
+        color: 0xe5c07b,
+        transparent: true,
+        opacity: 0.6
+      });
+      const anchorLine = new THREE.Line(lineGeo, lineMat);
+      this.cardMesh.add(anchorLine);
+
+      this.hologramGroup.add(this.cardMesh);
+    } else {
+      this.cardTexture.needsUpdate = true;
+    }
+  }
+
+  _renderCardTexture(meta) {
+    const ctx = this.cardContext;
+    const w = this.cardCanvas.width;
+    const h = this.cardCanvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Glassmorphic background
+    const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+    bgGrad.addColorStop(0, 'rgba(10, 18, 38, 0.94)');
+    bgGrad.addColorStop(1, 'rgba(5, 10, 24, 0.96)');
+    ctx.fillStyle = bgGrad;
+    this._roundRect(ctx, 20, 20, w - 40, h - 40, 24);
+    ctx.fill();
+
+    // Glowing border (Gold & Cyan)
+    const borderGrad = ctx.createLinearGradient(0, 0, w, 0);
+    borderGrad.addColorStop(0, '#ffd700');
+    borderGrad.addColorStop(0.5, '#00d2ff');
+    borderGrad.addColorStop(1, '#ffd700');
+    ctx.strokeStyle = borderGrad;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+
+    // Top Header Badge
+    ctx.fillStyle = 'rgba(0, 210, 255, 0.15)';
+    this._roundRect(ctx, 45, 45, 260, 42, 12);
+    ctx.fill();
+    ctx.strokeStyle = '#00d2ff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.font = 'bold 18px "Courier New", monospace';
+    ctx.fillStyle = '#00d2ff';
+    ctx.fillText('⚡ RDF LINKED DATA AR', 60, 72);
+
+    // Identifier Badge
+    ctx.font = '16px monospace';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.textAlign = 'right';
+    ctx.fillText(meta?.identifier || 'MS-SHIFA-1302', w - 50, 72);
+    ctx.textAlign = 'left';
+
+    // Title (English)
+    ctx.font = 'bold 34px "Segoe UI", Arial, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(meta?.title || 'Illuminated Manuscript', 50, 140);
+
+    // Arabic Subtitle
+    if (meta?.titleArabic) {
+      ctx.font = '28px "Amiri", "Traditional Arabic", serif';
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText(meta.titleArabic, 50, 185);
+    }
+
+    // Divider Line
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(50, 215);
+    ctx.lineTo(w - 50, 215);
+    ctx.stroke();
+
+    // Grid of Metadata Properties
+    const drawProp = (label, val, x, y, icon = '✦') => {
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText(`${icon} ${label}:`, x, y);
+
+      ctx.font = '20px sans-serif';
+      ctx.fillStyle = '#e2e8f0';
+      const truncated = val && val.length > 34 ? val.slice(0, 32) + '…' : (val || '—');
+      ctx.fillText(truncated, x, y + 26);
+    };
+
+    drawProp('AUTHOR / CREATOR', meta?.creator || 'Ibn Sīnā (Avicenna)', 50, 260, '👤');
+    drawProp('DATE & PERIOD', meta?.date || '16th-17th C.', 520, 260, '📅');
+
+    drawProp('MEDIUM & MATERIAL', meta?.material || 'Gold leaf, Lapis lazuli, Rag paper', 50, 340, '📜');
+    drawProp('HOLDING COLLECTION', meta?.publisher || 'Majlis Parliament Library', 520, 340, '🏛️');
+
+    drawProp('SCRIPT & STYLES', 'Naskh text with Marginal Nastaliq', 50, 420, '🖋️');
+    drawProp('DIMENSIONS', meta?.dimensions || '26.5 x 17.2 cm', 520, 420, '📐');
+
+    // Bottom Quote / Transcription Box
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    this._roundRect(ctx, 50, 490, w - 100, 180, 16);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 210, 255, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.font = 'bold 16px monospace';
+    ctx.fillStyle = '#00d2ff';
+    ctx.fillText('TEXT PREVIEW & ONTOLOGY (dc:description / ms:transcription)', 70, 525);
+
+    ctx.font = 'italic 18px "Amiri", "Traditional Arabic", serif';
+    ctx.fillStyle = '#fef08a';
+    ctx.fillText('« بِسْمِ اللهِ الرَّحْمَنِ الرَّحِيمِ - الحمد لله الواحد الأحد الصمد المصور... »', 70, 565);
+
+    ctx.font = '17px sans-serif';
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText('"In the Name of God... origination (ibdāʿ) and cosmic formation (takwīn)..."', 70, 605);
+
+    // Live Tracking Status footer
+    ctx.font = '15px monospace';
+    ctx.fillStyle = '#4ade80';
+    ctx.fillText('● TARGET TRACKED (60 FPS) — TAP PINS ON MANUSCRIPT FOR HOTSPOTS', 70, 645);
+
+    this.cardTexture.needsUpdate = true;
+  }
+
+  _roundRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+
+  createHotspots(hotspotsList) {
+    // Clear existing
+    while (this.hotspotGroup.children.length > 0) {
+      const obj = this.hotspotGroup.children[0];
+      this.hotspotGroup.remove(obj);
+    }
+    this.hotspotMeshes = [];
+
+    // Target image aspect ratio (width=1.0, height=0.88 approx based on 1024x902)
+    const targetW = 1.0;
+    const targetH = 0.88;
+
+    hotspotsList.forEach((hs, idx) => {
+      // Map normalized (0..1) to local 3D plane centered at (0,0,0)
+      const posX = (hs.normX - 0.5) * targetW;
+      const posY = (0.5 - hs.normY) * targetH; // inverted Y for 3D coordinates
+      const posZ = hs.elevZ || 0.05;
+
+      const group = new THREE.Group();
+      group.position.set(posX, posY, posZ);
+      group.userData = { hotspot: hs, index: idx };
+
+      // 1. Glowing Vertical Beam
+      const beamGeo = new THREE.CylinderGeometry(0.003, 0.003, posZ * 2, 8);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: 0x00d2ff,
+        transparent: true,
+        opacity: 0.7
+      });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.z = -posZ / 2;
+      beam.rotation.x = Math.PI / 2;
+      group.add(beam);
+
+      // 2. Base Target Ring on Manuscript Surface
+      const ringGeo = new THREE.RingGeometry(0.02, 0.035, 24);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xffd700,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.z = -posZ;
+      group.add(ring);
+
+      // 3. Floating 3D Octahedron / Diamond Pin Marker
+      const pinGeo = new THREE.OctahedronGeometry(0.032, 0);
+      const pinMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        emissive: 0x00d2ff,
+        emissiveIntensity: 0.6,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      const pinMesh = new THREE.Mesh(pinGeo, pinMat);
+      pinMesh.name = 'pinMesh';
+      group.add(pinMesh);
+
+      // 4. Billboard text label
+      const labelCanvas = document.createElement('canvas');
+      labelCanvas.width = 384;
+      labelCanvas.height = 96;
+      const lCtx = labelCanvas.getContext('2d');
+      lCtx.fillStyle = 'rgba(10, 18, 38, 0.88)';
+      this._roundRect(lCtx, 4, 4, 376, 88, 16);
+      lCtx.fill();
+      lCtx.strokeStyle = '#00d2ff';
+      lCtx.lineWidth = 3;
+      lCtx.stroke();
+
+      lCtx.font = 'bold 24px sans-serif';
+      lCtx.fillStyle = '#ffffff';
+      lCtx.textAlign = 'center';
+      const truncatedLabel = hs.label.length > 22 ? hs.label.slice(0, 20) + '…' : hs.label;
+      lCtx.fillText(truncatedLabel, 192, 44);
+
+      lCtx.font = '18px monospace';
+      lCtx.fillStyle = '#ffd700';
+      lCtx.fillText(hs.folio || 'Region', 192, 72);
+
+      const labelTex = new THREE.CanvasTexture(labelCanvas);
+      const labelGeo = new THREE.PlaneGeometry(0.24, 0.06);
+      const labelMat = new THREE.MeshBasicMaterial({
+        map: labelTex,
+        transparent: true,
+        side: THREE.DoubleSide
+      });
+      const labelMesh = new THREE.Mesh(labelGeo, labelMat);
+      labelMesh.position.y = 0.055;
+      labelMesh.name = 'labelBillboard';
+      group.add(labelMesh);
+
+      this.hotspotGroup.add(group);
+      this.hotspotMeshes.push(pinMesh);
+    });
+  }
+
+  update(delta) {
+    this.time += delta;
+
+    // Bobbing animation for the floating card
+    if (this.cardMesh) {
+      this.cardMesh.position.z = 0.15 + Math.sin(this.time * 2.0) * 0.015;
+    }
+
+    // Animate hotspot pins (spinning and pulsing)
+    this.hotspotGroup.children.forEach((group, idx) => {
+      const pin = group.getObjectByName('pinMesh');
+      if (pin) {
+        pin.rotation.y = this.time * 1.5 + idx;
+        pin.rotation.z = Math.sin(this.time * 2.0 + idx) * 0.2;
+        pin.position.y = Math.sin(this.time * 3.0 + idx) * 0.008;
+      }
+    });
+  }
+
+  checkRaycast(camera, screenX, screenY, width, height) {
+    this.mouse.x = (screenX / width) * 2 - 1;
+    this.mouse.y = -(screenY / height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mouse, camera);
+    const intersects = this.raycaster.intersectObjects(this.hotspotMeshes, true);
+
+    if (intersects.length > 0) {
+      const hit = intersects[0].object.parent;
+      if (hit && hit.userData && hit.userData.hotspot) {
+        return hit.userData.hotspot;
+      }
+    }
+    return null;
+  }
+}
