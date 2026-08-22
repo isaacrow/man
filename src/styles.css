@@ -1,9 +1,9 @@
 :root {
   --bg-app: #000000;
   --apple-canvas: #f5f5f7;
-  --apple-card-bg: rgba(255, 255, 255, 0.82);
-  --apple-card-border: rgba(255, 255, 255, 0.65);
-  --apple-card-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --apple-card-bg: rgba(255, 255, 255, 0.85);
+  --apple-card-border: rgba(255, 255, 255, 0.7);
+  --apple-card-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.04);
   --apple-subtle-border: rgba(0, 0, 0, 0.06);
   --apple-blue: #0071e3;
   --apple-blue-hover: #0077ed;
@@ -98,7 +98,7 @@ body, html {
   pointer-events: auto;
 }
 
-/* Apple Floating Navigation Bar */
+/* Top Navigation Bar */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -279,10 +279,10 @@ body, html {
   box-shadow: 0 0 8px rgba(52, 199, 89, 0.6);
 }
 
-/* Minimalist Apple Camera Reticle */
+/* Scanning Reticle Viewfinder */
 .scanning-hud {
   position: absolute;
-  top: 50%;
+  top: 48%;
   left: 50%;
   transform: translate(-50%, -50%);
   display: flex;
@@ -290,40 +290,40 @@ body, html {
   align-items: center;
   gap: 16px;
   pointer-events: none;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .scanning-hud.hidden {
   opacity: 0;
-  transform: translate(-50%, -46%) scale(0.96);
+  transform: translate(-50%, -44%) scale(0.95);
   pointer-events: none;
 }
 
 .reticle-box {
   position: relative;
-  width: 240px;
-  height: 240px;
+  width: 250px;
+  height: 250px;
 }
 
 .reticle-corner {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: rgba(255, 255, 255, 0.8);
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255, 255, 255, 0.85);
   border-style: solid;
 }
 
-.reticle-corner.tl { top: 0; left: 0; border-width: 2px 0 0 2px; border-top-left-radius: 12px; }
-.reticle-corner.tr { top: 0; right: 0; border-width: 2px 2px 0 0; border-top-right-radius: 12px; }
-.reticle-corner.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; border-bottom-left-radius: 12px; }
-.reticle-corner.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; border-bottom-right-radius: 12px; }
+.reticle-corner.tl { top: 0; left: 0; border-width: 2px 0 0 2px; border-top-left-radius: 14px; }
+.reticle-corner.tr { top: 0; right: 0; border-width: 2px 2px 0 0; border-top-right-radius: 14px; }
+.reticle-corner.bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; border-bottom-left-radius: 14px; }
+.reticle-corner.br { bottom: 0; right: 0; border-width: 0 2px 2px 0; border-bottom-right-radius: 14px; }
 
 .scan-msg {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  padding: 8px 18px;
+  padding: 8px 20px;
   border-radius: 24px;
   font-size: 13px;
   font-weight: 500;
@@ -331,14 +331,28 @@ body, html {
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
 }
 
-/* Bottom Apple Floating HUD Card */
+/* Bottom Collapsible / Slide-up HUD Panel */
 .bottom-panel-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-width: 720px;
+  max-width: 740px;
   width: 100%;
   margin: 0 auto;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+}
+
+/* Collapsed scanning state */
+.bottom-panel-container.collapsed {
+  transform: translateY(calc(100% + 20px));
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bottom-panel-container.expanded {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .hud-panel {
@@ -351,10 +365,48 @@ body, html {
   box-shadow: var(--apple-card-shadow);
   max-height: 48vh;
   overflow-y: auto;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Apple iOS Segmented Control Tabs */
+/* Target Switcher in Simulator */
+.target-switcher-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.target-segmented-control {
+  display: flex;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 3px;
+  border-radius: 12px;
+  gap: 2px;
+  max-width: 440px;
+  width: 100%;
+}
+
+.target-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--apple-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.target-btn.active {
+  background: #ffffff;
+  color: var(--apple-text-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* iOS Segmented Control Tabs */
 .tab-nav {
   display: flex;
   background: rgba(0, 0, 0, 0.05);
@@ -537,7 +589,7 @@ body, html {
   gap: 8px;
 }
 
-/* Apple VisionOS / iOS Modal Sheet */
+/* Apple Modal Sheet */
 .modal-backdrop {
   position: absolute;
   inset: 0;

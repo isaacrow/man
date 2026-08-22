@@ -31,7 +31,7 @@
           <div class="brand-badge">A</div>
           <div class="brand-text-group">
             <div class="brand-title">Alqami</div>
-            <div class="brand-subtitle">AR Manuscript Intelligence · RDF</div>
+            <div class="brand-subtitle">AR Manuscript Intelligence · Multi-Target RDF</div>
           </div>
         </div>
 
@@ -74,7 +74,7 @@
         <span id="tracking-text">Scanning for manuscript</span>
       </div>
 
-      <!-- Scanning Reticle HUD -->
+      <!-- Scanning Reticle HUD (Shown during search) -->
       <div id="scanning-hud" class="scanning-hud">
         <div class="reticle-box">
           <div class="reticle-corner tl"></div>
@@ -83,13 +83,21 @@
           <div class="reticle-corner br"></div>
         </div>
         <div class="scan-msg">
-          <span>Align manuscript within frame</span>
+          <span>Align manuscript within frame to scan</span>
         </div>
       </div>
 
-      <!-- Bottom Floating HUD Panel -->
-      <div class="bottom-panel-container">
+      <!-- Bottom Floating HUD Panel (Initially Collapsed until target is scanned) -->
+      <div id="bottom-panel" class="bottom-panel-container collapsed">
         <div class="hud-panel">
+          <!-- Target Switcher (Active in Simulator or when target selected) -->
+          <div id="target-switcher-wrapper" class="target-switcher-bar" style="display: none;">
+            <div class="target-segmented-control">
+              <button class="target-btn active" data-target="0">Manuscript 1 (Kitab al-Shifa)</button>
+              <button class="target-btn" data-target="1">Manuscript 2 (Quran)</button>
+            </div>
+          </div>
+
           <!-- Tab Navigation (Apple Segmented Control) -->
           <div class="tab-nav">
             <button class="tab-btn active" data-tab="tab-meta">
@@ -114,7 +122,7 @@
                 <div id="meta-title" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
-                <div class="meta-label">Author (dc:creator)</div>
+                <div class="meta-label">Author / Origin (dc:creator)</div>
                 <div id="meta-creator" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
@@ -126,7 +134,7 @@
                 <div id="meta-publisher" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card" style="grid-column: 1 / -1;">
-                <div class="meta-label">Material (schema:material)</div>
+                <div class="meta-label">Material & Technique (schema:material)</div>
                 <div id="meta-material" class="meta-value">Loading...</div>
               </div>
             </div>
@@ -236,10 +244,10 @@
         <div class="modal-body">
           <p style="margin-bottom: 12px;"><strong>Alqami</strong> provides real-time augmented reality intelligence for historical manuscripts driven by semantic RDF graphs.</p>
           <ul style="padding-left: 18px; margin-bottom: 16px; line-height: 1.6;">
-            <li><strong>Camera Mode:</strong> Point your device at the manuscript to inspect 3D spatial metadata and features.</li>
-            <li><strong>3D Simulator:</strong> Switch modes to preview and rotate the manuscript in a virtual space.</li>
-            <li><strong>Hotspot Anchors:</strong> Tap any 3D marker to inspect codicological notes.</li>
-            <li><strong>Semantic Graph:</strong> View Dublin Core, CIDOC-CRM, and Schema.org relations in real-time.</li>
+            <li><strong>Auto-Scan:</strong> Align either manuscript in your camera to reveal its 3D AR hologram and metadata panel.</li>
+            <li><strong>Multi-Target:</strong> Supports both <em>Kitab al-Shifa</em> (Avicenna) and the <em>Illuminated Quran</em>.</li>
+            <li><strong>Hotspot Anchors:</strong> Tap 3D markers on the manuscript to inspect codicological notes.</li>
+            <li><strong>Semantic Graph:</strong> View Dublin Core and CIDOC-CRM relations in real-time.</li>
           </ul>
           <p style="font-size: 12px; color: var(--apple-text-tertiary);">
             Built with WebAR, Three.js, N3.js, and RDF Ontologies.

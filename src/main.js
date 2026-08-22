@@ -7,14 +7,14 @@ import { ManuscriptSpeechEngine } from './speech.js';
 
 class AppController {
   constructor() {
-    this.mode = 'camera'; // 'camera' or 'simulator'
-    this.rdfParser = new RDFManuscriptParser();
+    this.mode = 'camera';
+    this.parsers = [new RDFManuscriptParser(), new RDFManuscriptParser()];
     this.speech = new ManuscriptSpeechEngine();
     this.arEngine = null;
     this.simulator = null;
-    this.cardManager = null;
+    this.cardManagers = [];
     this.graphVisualizer = null;
-    this.rawInitialTtl = '';
+    this.currentTargetIndex = 0;
     this.activeHotspot = null;
     this.lastTime = performance.now();
 
@@ -23,7 +23,6 @@ class AppController {
       arContainer: document.getElementById('ar-container'),
       simulatorContainer: document.getElementById('simulator-container'),
       modeToggleBtn: document.getElementById('btn-mode-toggle'),
-      modeIconSvg: document.getElementById('mode-icon-svg'),
       modeText: document.getElementById('mode-text'),
       audioGuideBtn: document.getElementById('btn-audio-guide'),
       snapshotBtn: document.getElementById('btn-snapshot'),
@@ -31,6 +30,9 @@ class AppController {
       trackingStatus: document.getElementById('tracking-status'),
       trackingText: document.getElementById('tracking-text'),
       scanningHud: document.getElementById('scanning-hud'),
+      bottomPanel: document.getElementById('bottom-panel'),
+      targetSwitcher: document.getElementById('target-switcher-wrapper'),
+      targetBtns: document.querySelectorAll('.target-btn'),
       metaTitle: document.getElementById('meta-title'),
       metaCreator: document.getElementById('meta-creator'),
       metaDate: document.getElementById('meta-date'),
@@ -56,37 +58,55 @@ class AppController {
   }
 
   async init() {
-    console.log('Initializing Alqami AR...');
+    console.log('Initializing Alqami Multi-Target AR...');
     this._setupTabNavigation();
     this._setupModals();
     this._setupButtons();
 
-    // 1. Load and parse RDF data
+    // 1. Load both RDF datasets
     try {
       const baseUrl = import.meta.env.BASE_URL || './';
-      const data = await this.rdfParser.loadFromUrl(`${baseUrl}data/manuscript.ttl`);
-      this.rawInitialTtl = this.rdfParser.rawTurtle;
-      this.dom.ttlEditor.value = this.rawInitialTtl;
-      this._updateUIWithMetadata(data.metadata);
+      await Promise.all([
+        this.parsers[0].loadFromUrl(`${baseUrl}data/manuscript.ttl`),
+        this.parsers[1].loadFromUrl(`${baseUrl}data/manuscript2.ttl`)
+      ]);
 
-      // Setup graph visualizer
+      this._displayTargetData(0);
+
       this.graphVisualizer = new RDFGraphVisualizer(this.dom.graphCanvas);
-      this.graphVisualizer.setData(this.rdfParser.getGraphData());
-      this.graphVisualizer.onSelect((node) => {
-        console.log('Selected Graph Node:', node);
-      });
+      this.graphVisualizer.setData(this.parsers[0].getGraphData());
     } catch (err) {
-      console.error('Failed to load initial RDF:', err);
+      console.error('Failed to load RDF datasets:', err);
     }
 
-    // 2. Initialize AR Camera mode
+    // 2. Start in Camera AR mode
     await this._startCameraMode();
+  }
+
+  _displayTargetData(targetIndex) {
+    this.currentTargetIndex = targetIndex;
+    const parser = this.parsers[targetIndex];
+    if (!parser || !parser.metadata) return;
+
+    this.dom.ttlEditor.value = parser.rawTurtle;
+    this._updateUIWithMetadata(parser.metadata);
+
+    if (this.graphVisualizer) {
+      this.graphVisualizer.setData(parser.getGraphData());
+    }
+
+    // Update target switcher buttons
+    this.dom.targetBtns.forEach(btn => {
+      const btnIdx = parseInt(btn.getAttribute('data-target'), 10);
+      btn.classList.toggle('active', btnIdx === targetIndex);
+    });
   }
 
   async _startCameraMode() {
     this.mode = 'camera';
     this.dom.arContainer.style.display = 'block';
     this.dom.simulatorContainer.style.display = 'none';
+    this.dom.targetSwitcher.style.display = 'none';
     this.dom.modeText.textContent = 'Camera';
     this.dom.modeToggleBtn.classList.add('active');
 
@@ -99,15 +119,17 @@ class AppController {
 
     try {
       const baseUrl = import.meta.env.BASE_URL || './';
-      this.arEngine = new AREngine(this.dom.arContainer, `${baseUrl}targets/manuscript.mind`);
+      this.arEngine = new AREngine(this.dom.arContainer, `${baseUrl}targets/targets.mind`);
 
-      this.arEngine.onTargetFound = () => {
-        console.log('Target Detected in AR Camera');
-        this._setTrackingState(true, 'Target Tracked · 60 FPS');
+      this.arEngine.onTargetFound = (targetIndex) => {
+        console.log(`Target ${targetIndex} Detected in AR Camera!`);
+        this._displayTargetData(targetIndex);
+        const name = targetIndex === 0 ? 'Kitab al-Shifa' : 'Illuminated Quran';
+        this._setTrackingState(true, `${name} · 60 FPS`);
       };
 
-      this.arEngine.onTargetLost = () => {
-        console.log('Target Lost in AR Camera');
+      this.arEngine.onTargetLost = (targetIndex) => {
+        console.log(`Target ${targetIndex} Lost`);
         this._setTrackingState(false, 'Scanning for manuscript');
       };
 
@@ -116,22 +138,22 @@ class AppController {
         this._startSimulatorMode();
       };
 
-      const { renderer, scene, camera, anchorGroup } = await this.arEngine.init();
+      const { renderer, scene, camera, anchorGroups } = await this.arEngine.init();
 
-      // Create Apple-style 3D Holographic Board, Hotspot Pins, and Frame
-      this.cardManager = new ARCardManager(anchorGroup);
-      this.cardManager.createHolographicCard(this.rdfParser.metadata);
-      this.cardManager.createHotspots(this.rdfParser.hotspots);
+      // Create 3D Holograms for both Target 0 and Target 1
+      this.cardManagers = anchorGroups.map((group, index) => {
+        const mgr = new ARCardManager(group);
+        mgr.createHolographicCard(this.parsers[index].metadata);
+        mgr.createHotspots(this.parsers[index].hotspots);
+        return mgr;
+      });
 
-      // Start AR tracking and animation loop
       this.lastTime = performance.now();
       await this.arEngine.start(() => {
         const now = performance.now();
         const delta = (now - this.lastTime) / 1000;
         this.lastTime = now;
-        if (this.cardManager) {
-          this.cardManager.update(delta);
-        }
+        this.cardManagers.forEach(mgr => mgr.update(delta));
       });
 
       this._setupInteractionRaycasting(renderer.domElement, camera);
@@ -145,6 +167,7 @@ class AppController {
     this.mode = 'simulator';
     this.dom.arContainer.style.display = 'none';
     this.dom.simulatorContainer.style.display = 'block';
+    this.dom.targetSwitcher.style.display = 'flex';
     this.dom.modeText.textContent = 'Simulator';
     this.dom.modeToggleBtn.classList.remove('active');
 
@@ -155,8 +178,10 @@ class AppController {
 
     this.simulator = new ManuscriptSimulator(
       this.dom.simulatorContainer,
-      () => {
-        this._setTrackingState(true, 'Target Tracked (3D)');
+      (targetIndex) => {
+        this._displayTargetData(targetIndex);
+        const name = targetIndex === 0 ? 'Kitab al-Shifa' : 'Illuminated Quran';
+        this._setTrackingState(true, `${name} (Virtual 3D)`);
       },
       () => {
         this._setTrackingState(false, 'Target Not in View');
@@ -166,9 +191,9 @@ class AppController {
     const anchorGroup = this.simulator.getAnchorGroup();
     const camera = this.simulator.getCamera();
 
-    this.cardManager = new ARCardManager(anchorGroup);
-    this.cardManager.createHolographicCard(this.rdfParser.metadata);
-    this.cardManager.createHotspots(this.rdfParser.hotspots);
+    this.cardManagers = [new ARCardManager(anchorGroup)];
+    this.cardManagers[0].createHolographicCard(this.parsers[0].metadata);
+    this.cardManagers[0].createHotspots(this.parsers[0].hotspots);
 
     this._setupInteractionRaycasting(this.simulator.renderer.domElement, camera);
   }
@@ -178,8 +203,8 @@ class AppController {
       const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
       const clientY = e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
 
-      if (this.cardManager) {
-        const hitHotspot = this.cardManager.checkRaycast(
+      for (const mgr of this.cardManagers) {
+        const hitHotspot = mgr.checkRaycast(
           camera,
           clientX,
           clientY,
@@ -189,6 +214,7 @@ class AppController {
 
         if (hitHotspot) {
           this._openHotspotModal(hitHotspot);
+          break;
         }
       }
     };
@@ -201,10 +227,16 @@ class AppController {
       this.dom.trackingStatus.classList.add('found');
       this.dom.trackingText.textContent = message || 'Target Tracked';
       this.dom.scanningHud.classList.add('hidden');
+      // Reveal the bottom metadata HUD panel with smooth slide-up
+      this.dom.bottomPanel.classList.remove('collapsed');
+      this.dom.bottomPanel.classList.add('expanded');
     } else {
       this.dom.trackingStatus.classList.remove('found');
       this.dom.trackingText.textContent = message || 'Scanning for manuscript';
       this.dom.scanningHud.classList.remove('hidden');
+      // Collapse the bottom HUD panel back so the camera viewfinder is completely clear
+      this.dom.bottomPanel.classList.add('collapsed');
+      this.dom.bottomPanel.classList.remove('expanded');
     }
   }
 
@@ -212,7 +244,7 @@ class AppController {
     if (!meta) return;
 
     this.dom.metaTitle.textContent = meta.title || '—';
-    this.dom.metaCreator.textContent = `${meta.creator || 'Ibn Sina'} (${meta.authorJob || ''})`;
+    this.dom.metaCreator.textContent = `${meta.creator || 'Master Scribe'} (${meta.authorJob || ''})`;
     this.dom.metaDate.textContent = meta.date || '—';
     this.dom.metaPublisher.textContent = meta.publisher || '—';
     this.dom.metaMaterial.textContent = meta.material || '—';
@@ -275,7 +307,7 @@ class AppController {
   }
 
   _setupButtons() {
-    // Mode switch
+    // Mode toggle
     this.dom.modeToggleBtn.addEventListener('click', () => {
       if (this.mode === 'camera') {
         this._startSimulatorMode();
@@ -284,9 +316,26 @@ class AppController {
       }
     });
 
+    // Target Switcher in Simulator
+    this.dom.targetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetIdx = parseInt(btn.getAttribute('data-target'), 10);
+        this._displayTargetData(targetIdx);
+
+        if (this.simulator) {
+          this.simulator.loadTarget(targetIdx);
+          if (this.cardManagers[0]) {
+            this.cardManagers[0].createHolographicCard(this.parsers[targetIdx].metadata);
+            this.cardManagers[0].createHotspots(this.parsers[targetIdx].hotspots);
+          }
+        }
+      });
+    });
+
     // Audio Guide Main
     this.dom.audioGuideBtn.addEventListener('click', () => {
-      const summary = `You are viewing the illuminated opening of Kitab al-Shifa, the Book of Healing, by the legendary Islamic polymath Ibn Sina, also known as Avicenna. This manuscript features an ornate lapis lazuli and gold headpiece, clear Naskh calligraphy, and the historical seal of the Iranian National Parliament Library.`;
+      const meta = this.parsers[this.currentTargetIndex]?.metadata;
+      const summary = `You are viewing ${meta?.title || 'the historical manuscript'}. Material: ${meta?.material || 'Handmade paper'}. Holding repository: ${meta?.publisher || 'Majlis Parliament Library'}.`;
       this.speech.toggle(summary, 'en');
     });
 
@@ -323,16 +372,17 @@ class AppController {
     this.dom.btnApplyRdf.addEventListener('click', async () => {
       try {
         const updatedTtl = this.dom.ttlEditor.value;
-        const data = await this.rdfParser.parseTurtle(updatedTtl);
+        const data = await this.parsers[this.currentTargetIndex].parseTurtle(updatedTtl);
         this._updateUIWithMetadata(data.metadata);
 
-        if (this.cardManager) {
-          this.cardManager.createHolographicCard(data.metadata);
-          this.cardManager.createHotspots(data.hotspots);
+        const currentMgr = this.cardManagers[this.currentTargetIndex] || this.cardManagers[0];
+        if (currentMgr) {
+          currentMgr.createHolographicCard(data.metadata);
+          currentMgr.createHotspots(data.hotspots);
         }
 
         if (this.graphVisualizer) {
-          this.graphVisualizer.setData(this.rdfParser.getGraphData());
+          this.graphVisualizer.setData(this.parsers[this.currentTargetIndex].getGraphData());
         }
 
         alert('AR Hologram and metadata updated successfully.');
@@ -343,17 +393,19 @@ class AppController {
 
     // RDF Live Editor: Reset
     this.dom.btnResetRdf.addEventListener('click', async () => {
-      this.dom.ttlEditor.value = this.rawInitialTtl;
-      const data = await this.rdfParser.parseTurtle(this.rawInitialTtl);
+      const parser = this.parsers[this.currentTargetIndex];
+      this.dom.ttlEditor.value = parser.rawTurtle;
+      const data = await parser.parseTurtle(parser.rawTurtle);
       this._updateUIWithMetadata(data.metadata);
 
-      if (this.cardManager) {
-        this.cardManager.createHolographicCard(data.metadata);
-        this.cardManager.createHotspots(data.hotspots);
+      const currentMgr = this.cardManagers[this.currentTargetIndex] || this.cardManagers[0];
+      if (currentMgr) {
+        currentMgr.createHolographicCard(data.metadata);
+        currentMgr.createHotspots(data.hotspots);
       }
 
       if (this.graphVisualizer) {
-        this.graphVisualizer.setData(this.rdfParser.getGraphData());
+        this.graphVisualizer.setData(parser.getGraphData());
       }
     });
   }

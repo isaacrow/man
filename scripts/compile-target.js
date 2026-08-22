@@ -38,34 +38,41 @@ class NodeCompiler extends CompilerBase {
   }
 }
 
-async function compileManuscript() {
-  const inputImagePath = path.resolve(__dirname, '../manuscript.jpg');
+async function compileManuscripts() {
   const outputDir = path.resolve(__dirname, '../public/targets');
-  const outputPath = path.join(outputDir, 'manuscript.mind');
-
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  console.log(`Loading image from ${inputImagePath}...`);
-  const image = await loadImage(inputImagePath);
-  console.log(`Image loaded: ${image.width}x${image.height} px`);
+  const img1Path = path.resolve(__dirname, '../manuscript.jpg');
+  const img2Path = path.resolve(__dirname, '../manuscript2.jpg');
+
+  console.log(`Loading Target 1: ${img1Path}...`);
+  const image1 = await loadImage(img1Path);
+
+  console.log(`Loading Target 2: ${img2Path}...`);
+  const image2 = await loadImage(img2Path);
 
   const compiler = new NodeCompiler();
-  console.log('Compiling target image into .mind format (this extracts multiscale feature points)...');
+  console.log('Compiling both manuscripts into multi-target targets.mind descriptor...');
 
-  await compiler.compileImageTargets([image], (progress) => {
+  await compiler.compileImageTargets([image1, image2], (progress) => {
     process.stdout.write(`\rProgress: ${progress.toFixed(1)}%`);
   });
 
-  console.log('\nCompilation finished. Exporting buffer...');
+  console.log('\nExporting multi-target buffer...');
   const buffer = compiler.exportData();
 
+  const outputPath = path.join(outputDir, 'targets.mind');
   fs.writeFileSync(outputPath, Buffer.from(buffer));
-  console.log(`Successfully saved target to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
+  console.log(`Successfully saved multi-target descriptor to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
+
+  // Also write manuscript.mind as alias for backwards compatibility
+  const singlePath = path.join(outputDir, 'manuscript.mind');
+  fs.writeFileSync(singlePath, Buffer.from(buffer));
 }
 
-compileManuscript().catch((err) => {
-  console.error('Error compiling target:', err);
+compileManuscripts().catch((err) => {
+  console.error('Error compiling targets:', err);
   process.exit(1);
 });

@@ -2,13 +2,13 @@ import { MindARThree } from 'mind-ar/dist/mindar-image-three.prod.js';
 import * as THREE from 'three';
 
 export class AREngine {
-  constructor(containerElement, targetSrc = '/targets/manuscript.mind') {
+  constructor(containerElement, targetSrc = '/targets/targets.mind') {
     this.container = containerElement;
     this.targetSrc = targetSrc;
     this.mindarThree = null;
-    this.anchor = null;
+    this.anchors = [];
     this.isRunning = false;
-    this.isTargetFound = false;
+    this.activeTargetIndex = -1;
 
     this.onTargetFound = null;
     this.onTargetLost = null;
@@ -24,7 +24,7 @@ export class AREngine {
       this.mindarThree = new MindARThree({
         container: this.container,
         imageTargetSrc: this.targetSrc,
-        filterMinCF: 0.0005, // Ultra-smooth filter for jitter reduction
+        filterMinCF: 0.0005,
         filterBeta: 500,
         warmupTolerance: 4,
         missTolerance: 6,
@@ -48,28 +48,35 @@ export class AREngine {
       dirLight.position.set(1, 3, 2);
       scene.add(dirLight);
 
-      const pointLight = new THREE.PointLight(0x00d2ff, 2.0, 8);
+      const pointLight = new THREE.PointLight(0x0071e3, 2.0, 8);
       pointLight.position.set(0, 1, 1);
       scene.add(pointLight);
 
-      // Add target anchor (Target index 0 = manuscript)
-      this.anchor = this.mindarThree.addAnchor(0);
+      // Support Target 0 (Manuscript 1) and Target 1 (Manuscript 2)
+      this.anchors = [
+        this.mindarThree.addAnchor(0),
+        this.mindarThree.addAnchor(1)
+      ];
 
-      this.anchor.onTargetFound = () => {
-        this.isTargetFound = true;
-        if (this.onTargetFound) this.onTargetFound();
-      };
+      this.anchors.forEach((anchor, index) => {
+        anchor.onTargetFound = () => {
+          this.activeTargetIndex = index;
+          if (this.onTargetFound) this.onTargetFound(index);
+        };
 
-      this.anchor.onTargetLost = () => {
-        this.isTargetFound = false;
-        if (this.onTargetLost) this.onTargetLost();
-      };
+        anchor.onTargetLost = () => {
+          if (this.activeTargetIndex === index) {
+            this.activeTargetIndex = -1;
+          }
+          if (this.onTargetLost) this.onTargetLost(index);
+        };
+      });
 
       return {
         renderer,
         scene,
         camera,
-        anchorGroup: this.anchor.group
+        anchorGroups: this.anchors.map(a => a.group)
       };
     } catch (err) {
       console.error('AREngine init error:', err);
@@ -84,7 +91,6 @@ export class AREngine {
       await this.mindarThree.start();
       this.isRunning = true;
 
-      // Start the official Three.js animation render loop
       const { renderer, scene, camera } = this.mindarThree;
       renderer.setAnimationLoop(() => {
         if (onFrameUpdate) onFrameUpdate();
@@ -111,12 +117,12 @@ export class AREngine {
         console.warn('Error during MindAR stop:', e);
       }
       this.isRunning = false;
-      this.isTargetFound = false;
+      this.activeTargetIndex = -1;
     }
   }
 
-  getAnchorGroup() {
-    return this.anchor ? this.anchor.group : null;
+  getAnchorGroups() {
+    return this.anchors.map(a => a.group);
   }
 
   getCamera() {

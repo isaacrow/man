@@ -1,0 +1,83 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <http://schema.org/> .
+@prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix ms: <https://w3id.org/manuscript-ar/ontology#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+
+# ==============================================================================
+# MANUSCRIPT 2: ILLUMINATED QUR'AN OPENING FRONTISPIECE
+# ==============================================================================
+
+<https://w3id.org/manuscript-ar/item/MS-QURAN-1302> a schema:Manuscript, crm:E22_Human-Made_Object, edm:ProvidedCHO ;
+    dc:title "Illuminated Qur'an Opening: Surah Al-Fatihah & Al-Baqarah"@en ;
+    dc:title "مصحف شريف مذهب: فاتحة الكتاب وأول البقرة"@ar ;
+    dc:title "قرآن خطی نفیس مذهب: سوره فاتحه و بقره"@fa ;
+    dc:creator "Master Scribes of the Royal Court Workshop"@en ;
+    dc:date "18th-19th Century CE (Qajar / Late Safavid Period)"@en ;
+    dc:language "ar" ;
+    dc:format "Double-page fully illuminated frontispiece codex"@en ;
+    dc:type "Illuminated Sacred Manuscript (Mus'haf)"@en ;
+    dc:identifier "MS-QURAN-1302-MAJLIS" ;
+    dc:publisher "Parliament Library Collection (Ketabkhaneh-ye Majles)"@en ;
+    dc:rights <http://creativecommons.org/publicdomain/mark/1.0/> ;
+    
+    schema:name "Illuminated Double-Page Qur'an Frontispiece"@en ;
+    schema:material "Polished linen rag paper (kaghaz-e dawlatabadi), 24K shell gold (tala-ye hall), lapis lazuli pigment, vermilion rubrication, black carbon ink"@en ;
+    schema:artform "Imperial Islamic Illumination (Tadhhib) & Naskh Calligraphy"@en ;
+    schema:inLanguage "Classical Arabic"@en ;
+    
+    ms:dimensions "28.0 cm x 18.5 cm" ;
+    ms:folioLayout "Double-column arched illuminated cartouches framed by polylobed arabesque floral borders"@en ;
+    ms:rulingTechnique "Mastar (embossed ruling lines in paper)"@en ;
+    ms:rubrication "Surah title cartouches and verse separators in shell gold and cinnabar"@en ;
+    
+    ms:hasHotspot ms:HotspotQuranFatihah, ms:HotspotQuranBaqarah, ms:HotspotQuranBorder, ms:HotspotQuranSeal ;
+    
+    ms:transcriptionArabic """بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ - الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ - الرَّحْمَنِ الرَّحِيمِ - مَالِكِ يَوْمِ الدِّينِ - إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ - اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ - صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ
+
+بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ - الم - ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ - الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ"""@ar ;
+    
+    ms:translationEnglish """In the Name of God, the Most Gracious, the Most Merciful. All praise is due to God, Lord of all the worlds. The Most Gracious, the Most Merciful. Master of the Day of Judgment. You alone we worship, and You alone we ask for help. Guide us to the straight path—the path of those upon whom You have bestowed favor, not of those who have evoked Your anger, nor of those who are astray.
+
+In the Name of God, the Most Gracious, the Most Merciful. Alif, Lam, Meem. This is the Book about which there is no doubt, a guidance for those conscious of God—who believe in the unseen, establish prayer, and spend out of what We have provided for them..."""@en .
+
+# ==============================================================================
+# SPATIAL HOTSPOTS FOR MANUSCRIPT 2
+# ==============================================================================
+
+ms:HotspotQuranFatihah a ms:SpatialHotspot ;
+    rdfs:label "Surah Al-Fatihah Opening"@en ;
+    ms:targetFolio "Right Folio (Recto)"@en ;
+    ms:normalizedX 0.68 ;
+    ms:normalizedY 0.48 ;
+    ms:elevationZ 0.06 ;
+    dc:description "The opening chapter of the Qur'an written in fine vocalized Naskh calligraphy on gold cloudband ground."@en .
+
+ms:HotspotQuranBaqarah a ms:SpatialHotspot ;
+    rdfs:label "Surah Al-Baqarah Opening"@en ;
+    ms:targetFolio "Left Folio (Verso)"@en ;
+    ms:normalizedX 0.32 ;
+    ms:normalizedY 0.48 ;
+    ms:elevationZ 0.06 ;
+    dc:description "Opening verses of the second chapter with gold illuminated header cartouche."@en .
+
+ms:HotspotQuranBorder a ms:SpatialHotspot ;
+    rdfs:label "Lapis & Gold Tadhhib Border"@en ;
+    ms:targetFolio "Folio Margins"@en ;
+    ms:normalizedX 0.85 ;
+    ms:normalizedY 0.32 ;
+    ms:elevationZ 0.08 ;
+    dc:description "Polylobed floral arabesque (islimi) border rendered in pure lapis lazuli blue, turquoise, and 24-karat shell gold."@en .
+
+ms:HotspotQuranSeal a ms:SpatialHotspot ;
+    rdfs:label "Majlis Library Accession Seal"@en ;
+    ms:targetFolio "Top Right Outer Margin"@en ;
+    ms:normalizedX 0.92 ;
+    ms:normalizedY 0.09 ;
+    ms:elevationZ 0.05 ;
+    dc:description "Historical circular provenance seal of the Iranian National Parliament Library (Majlis Shura, Est. 1302 AH / 1923 CE)."@en .

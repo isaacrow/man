@@ -14,6 +14,7 @@ export class ManuscriptSimulator {
     this.scene.add(this.anchorGroup);
 
     this.manuscriptMesh = null;
+    this.currentTargetIndex = 0;
     this.isTracking = false;
     this.isDragging = false;
     this.previousMousePosition = { x: 0, y: 0 };
@@ -32,56 +33,61 @@ export class ManuscriptSimulator {
     }
     this.container.appendChild(this.renderer.domElement);
 
-    // Camera initial pose
     this._updateCameraTransform();
 
-    // Subtle atmospheric ambient lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
     this.scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0xffeedd, 1.8);
     dirLight.position.set(2, 4, 3);
     this.scene.add(dirLight);
 
-    // Blue holographic back rim light
-    const rimLight = new THREE.PointLight(0x00d2ff, 2.5, 10);
+    const rimLight = new THREE.PointLight(0x0071e3, 2.0, 10);
     rimLight.position.set(-2, 2, -1);
     this.scene.add(rimLight);
 
-    // Load manuscript plane
+    // Studio grid
+    const grid = new THREE.GridHelper(5, 20, 0xd2d2d7, 0xe5e5ea);
+    grid.position.y = -0.01;
+    this.scene.add(grid);
+
+    this.loadTarget(0);
+    this._setupControls();
+    this._animate();
+  }
+
+  loadTarget(targetIndex = 0) {
+    this.currentTargetIndex = targetIndex;
     const baseUrl = import.meta.env.BASE_URL || './';
+    const imageSrc = targetIndex === 0 ? `${baseUrl}manuscript.jpg` : `${baseUrl}manuscript2.jpg`;
+
+    if (this.manuscriptMesh) {
+      this.anchorGroup.remove(this.manuscriptMesh);
+      this.manuscriptMesh = null;
+    }
+
     const textureLoader = new THREE.TextureLoader();
-    textureLoader.load(`${baseUrl}manuscript.jpg`, (tex) => {
+    textureLoader.load(imageSrc, (tex) => {
       if (tex.encoding !== undefined) {
         tex.encoding = THREE.sRGBEncoding;
       }
       const aspect = tex.image.width / tex.image.height;
       const height = 1.0 / aspect;
 
-      // Realistic manuscript parchment material
       const planeGeo = new THREE.PlaneGeometry(1.0, height);
       const planeMat = new THREE.MeshStandardMaterial({
         map: tex,
         roughness: 0.8,
-        metalness: 0.1,
+        metalness: 0.05,
         side: THREE.DoubleSide
       });
       this.manuscriptMesh = new THREE.Mesh(planeGeo, planeMat);
-      this.manuscriptMesh.rotation.x = -Math.PI / 2; // Flat on table
+      this.manuscriptMesh.rotation.x = -Math.PI / 2;
       this.anchorGroup.add(this.manuscriptMesh);
 
-      // Studio tabletop / desk grid
-      const grid = new THREE.GridHelper(5, 20, 0x00d2ff, 0x1e293b);
-      grid.position.y = -0.01;
-      this.scene.add(grid);
-
-      // Trigger detected
       this.isTracking = true;
-      if (this.onTargetFound) this.onTargetFound();
+      if (this.onTargetFound) this.onTargetFound(targetIndex);
     });
-
-    this._setupControls();
-    this._animate();
   }
 
   _setupControls() {
@@ -105,7 +111,6 @@ export class ManuscriptSimulator {
 
       this.cameraRotation.y -= deltaX * 0.006;
       this.cameraRotation.x -= deltaY * 0.006;
-      // Clamp vertical pitch
       this.cameraRotation.x = Math.max(-Math.PI / 2.2, Math.min(-0.05, this.cameraRotation.x));
 
       this.previousMousePosition = { x: clientX, y: clientY };
