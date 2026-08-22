@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#070b14" />
+  <meta name="theme-color" content="#ffffff" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Manuscript WebAR · RDF Linked Data Hologram</title>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Alqami · AR Manuscript Intelligence</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/src/styles.css" />
 </head>
@@ -28,99 +28,117 @@
       <!-- Top Navigation & Controls -->
       <header class="top-bar">
         <div class="brand">
-          <div class="brand-icon">📜</div>
-          <div>
-            <div class="brand-title">Kitāb al-Shifāʾ AR</div>
-            <div class="brand-subtitle">RDF · WebXR · MindAR 1.2</div>
+          <div class="brand-badge">A</div>
+          <div class="brand-text-group">
+            <div class="brand-title">Alqami</div>
+            <div class="brand-subtitle">AR Manuscript Intelligence · RDF</div>
           </div>
         </div>
 
         <div class="top-actions">
-          <button id="btn-mode-toggle" class="btn-pill active" title="Switch between Camera AR and Desktop Simulator">
-            <span id="mode-icon">📷</span> <span id="mode-text">AR Camera</span>
+          <button id="btn-mode-toggle" class="btn-pill active" title="Switch View Mode">
+            <svg id="mode-icon-svg" viewBox="0 0 24 24">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span id="mode-text">Camera</span>
           </button>
-          <button id="btn-audio-guide" class="btn-icon" title="Listen to scholarly audio narration">
-            🔊
+
+          <button id="btn-audio-guide" class="btn-icon" title="Audio Guide">
+            <svg viewBox="0 0 24 24">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
           </button>
-          <button id="btn-snapshot" class="btn-icon" title="Capture AR snapshot">
-            📸
+
+          <button id="btn-snapshot" class="btn-icon" title="Capture Snapshot">
+            <svg viewBox="0 0 24 24">
+              <rect x="3" y="3" width="18" height="18" rx="4" ry="4"></rect>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
           </button>
-          <button id="btn-help" class="btn-icon" title="Instructions & About">
-            ℹ️
+
+          <button id="btn-help" class="btn-icon" title="Information">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
           </button>
         </div>
       </header>
 
       <!-- Tracking Status Pill -->
       <div id="tracking-status" class="tracking-status-pill">
-        <span class="pulse-dot"></span>
-        <span id="tracking-text">Scanning for Manuscript...</span>
+        <span class="status-indicator-dot"></span>
+        <span id="tracking-text">Scanning for manuscript</span>
       </div>
 
-      <!-- Scanning Reticle HUD (Shown when searching) -->
+      <!-- Scanning Reticle HUD -->
       <div id="scanning-hud" class="scanning-hud">
         <div class="reticle-box">
-          <div class="reticle-corners"></div>
-          <div class="reticle-laser"></div>
+          <div class="reticle-corner tl"></div>
+          <div class="reticle-corner tr"></div>
+          <div class="reticle-corner bl"></div>
+          <div class="reticle-corner br"></div>
         </div>
         <div class="scan-msg">
-          <span class="pulse-dot"></span>
-          <span>Point camera at the Illuminated Manuscript</span>
+          <span>Align manuscript within frame</span>
         </div>
       </div>
 
       <!-- Bottom Floating HUD Panel -->
       <div class="bottom-panel-container">
         <div class="hud-panel">
-          <!-- Tab Navigation -->
+          <!-- Tab Navigation (Apple Segmented Control) -->
           <div class="tab-nav">
             <button class="tab-btn active" data-tab="tab-meta">
-              <span>📋</span> Metadata
+              Metadata
             </button>
             <button class="tab-btn" data-tab="tab-transcription">
-              <span>📜</span> Transcription
+              Transcription
             </button>
             <button class="tab-btn" data-tab="tab-graph">
-              <span>🌐</span> RDF Graph
+              RDF Graph
             </button>
             <button class="tab-btn" data-tab="tab-editor">
-              <span>📝</span> RDF Editor
+              Editor
             </button>
           </div>
 
-          <!-- Tab 1: Codicology & Dublin Core Metadata -->
+          <!-- Tab 1: Metadata -->
           <div id="tab-meta" class="tab-pane active">
             <div class="meta-grid">
               <div class="meta-card">
-                <div class="meta-label">✦ Title (dc:title)</div>
+                <div class="meta-label">Title (dc:title)</div>
                 <div id="meta-title" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
-                <div class="meta-label">👤 Author / Creator (dc:creator)</div>
+                <div class="meta-label">Author (dc:creator)</div>
                 <div id="meta-creator" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
-                <div class="meta-label">📅 Date (dc:date)</div>
+                <div class="meta-label">Period (dc:date)</div>
                 <div id="meta-date" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
-                <div class="meta-label">🏛️ Repository (dc:publisher)</div>
+                <div class="meta-label">Repository (dc:publisher)</div>
                 <div id="meta-publisher" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card" style="grid-column: 1 / -1;">
-                <div class="meta-label">📜 Physical Material (schema:material)</div>
+                <div class="meta-label">Material (schema:material)</div>
                 <div id="meta-material" class="meta-value">Loading...</div>
               </div>
             </div>
           </div>
 
-          <!-- Tab 2: Arabic Text Transcription & Translation -->
+          <!-- Tab 2: Transcription & Translation -->
           <div id="tab-transcription" class="tab-pane">
             <div class="transcription-box">
               <div class="transcription-header">
-                <div class="meta-label">📖 Original Arabic (ms:transcriptionArabic)</div>
+                <div class="meta-label">Arabic Text (ms:transcriptionArabic)</div>
                 <button id="btn-read-ar" class="btn-pill" style="font-size: 11px; padding: 4px 10px;">
-                  🔊 Read Arabic
+                  Listen (Arabic)
                 </button>
               </div>
               <div id="text-arabic" class="arabic-text">
@@ -128,20 +146,20 @@
               </div>
             </div>
 
-            <div class="transcription-box" style="border-left-color: var(--cyan-primary);">
+            <div class="transcription-box">
               <div class="transcription-header">
-                <div class="meta-label">🇬🇧 English Translation (ms:translationEnglish)</div>
+                <div class="meta-label">English Translation (ms:translationEnglish)</div>
                 <button id="btn-read-en" class="btn-pill" style="font-size: 11px; padding: 4px 10px;">
-                  🔊 Read English
+                  Listen (English)
                 </button>
               </div>
-              <div id="text-english" class="meta-value" style="font-style: italic; line-height: 1.6;">
+              <div id="text-english" class="meta-value" style="color: var(--apple-text-secondary); line-height: 1.6;">
                 Loading translation...
               </div>
             </div>
           </div>
 
-          <!-- Tab 3: Interactive RDF Graph Visualization -->
+          <!-- Tab 3: Interactive RDF Graph Visualizer -->
           <div id="tab-graph" class="tab-pane">
             <div id="graph-canvas-container">
               <canvas id="graph-canvas"></canvas>
@@ -149,11 +167,11 @@
             <div class="graph-legend">
               <div class="legend-item">
                 <div class="legend-dot dot-resource"></div>
-                <span>Manuscript Resource</span>
+                <span>Resource</span>
               </div>
               <div class="legend-item">
                 <div class="legend-dot dot-entity"></div>
-                <span>Linked Entity (Wikidata / URI)</span>
+                <span>Linked Entity</span>
               </div>
               <div class="legend-item">
                 <div class="legend-dot dot-literal"></div>
@@ -167,11 +185,11 @@
             <div class="editor-wrapper">
               <textarea id="ttl-code-editor" class="ttl-textarea" spellcheck="false"></textarea>
               <div class="editor-actions">
-                <button id="btn-reset-rdf" class="btn-pill" style="border-color: #ef4444; color: #ef4444;">
-                  ↺ Reset
+                <button id="btn-reset-rdf" class="btn-pill" style="color: var(--apple-system-red);">
+                  Reset
                 </button>
-                <button id="btn-apply-rdf" class="btn-pill" style="background: var(--cyan-primary); color: #000; font-weight: 700;">
-                  ⚡ Apply Changes to AR Hologram
+                <button id="btn-apply-rdf" class="btn-pill" style="background: var(--apple-blue); color: #ffffff; border-color: var(--apple-blue);">
+                  Update Hologram
                 </button>
               </div>
             </div>
@@ -180,41 +198,51 @@
       </div>
     </div>
 
-    <!-- Hotspot Detail Modal -->
+    <!-- Hotspot Detail Modal Sheet -->
     <div id="hotspot-modal" class="modal-backdrop">
       <div class="modal-dialog">
         <div class="modal-header">
-          <div id="modal-title" class="modal-title">Hotspot Annotation</div>
-          <button id="btn-close-modal" class="btn-icon">✕</button>
+          <div id="modal-title" class="modal-title">Feature Annotation</div>
+          <button id="btn-close-modal" class="btn-icon">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <div id="modal-body" class="modal-body">
-          Details about the highlighted manuscript section.
+          Annotation details.
         </div>
         <div style="display: flex; justify-content: flex-end;">
-          <button id="btn-modal-action" class="btn-pill">
-            🔊 Listen to Description
+          <button id="btn-modal-action" class="btn-pill" style="background: #1d1d1f; color: #ffffff;">
+            Listen to Description
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Help & About Modal -->
+    <!-- Help & About Modal Sheet -->
     <div id="help-modal" class="modal-backdrop">
       <div class="modal-dialog">
         <div class="modal-header">
-          <div class="modal-title">About Kitāb al-Shifāʾ WebAR</div>
-          <button id="btn-close-help" class="btn-icon">✕</button>
+          <div class="modal-title">About Alqami</div>
+          <button id="btn-close-help" class="btn-icon">
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
         <div class="modal-body">
-          <p style="margin-bottom: 12px;"><strong>How to Use:</strong></p>
-          <ul style="padding-left: 20px; margin-bottom: 16px; line-height: 1.6;">
-            <li><strong>AR Camera Mode:</strong> Point your mobile camera (iOS Safari or Android Chrome) or desktop webcam at the illuminated manuscript image.</li>
-            <li><strong>Desktop Simulator:</strong> Click the "AR Camera / Simulator" button at the top to orbit and inspect the manuscript in a virtual 3D environment.</li>
-            <li><strong>Hotspot Pins:</strong> Tap the 3D glowing pins floating above the unwan header, calligraphy, and seal to read detailed codicological notes.</li>
-            <li><strong>Live RDF Editor:</strong> Modify the Turtle RDF in Tab 4 to dynamically update the 3D hologram in real-time.</li>
+          <p style="margin-bottom: 12px;"><strong>Alqami</strong> provides real-time augmented reality intelligence for historical manuscripts driven by semantic RDF graphs.</p>
+          <ul style="padding-left: 18px; margin-bottom: 16px; line-height: 1.6;">
+            <li><strong>Camera Mode:</strong> Point your device at the manuscript to inspect 3D spatial metadata and features.</li>
+            <li><strong>3D Simulator:</strong> Switch modes to preview and rotate the manuscript in a virtual space.</li>
+            <li><strong>Hotspot Anchors:</strong> Tap any 3D marker to inspect codicological notes.</li>
+            <li><strong>Semantic Graph:</strong> View Dublin Core, CIDOC-CRM, and Schema.org relations in real-time.</li>
           </ul>
-          <p style="font-size: 12px; color: var(--text-muted);">
-            Powered by MindAR, Three.js, N3.js, and Dublin Core / CIDOC-CRM Semantic Ontologies.
+          <p style="font-size: 12px; color: var(--apple-text-tertiary);">
+            Built with WebAR, Three.js, N3.js, and RDF Ontologies.
           </p>
         </div>
       </div>

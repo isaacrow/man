@@ -23,7 +23,7 @@ class AppController {
       arContainer: document.getElementById('ar-container'),
       simulatorContainer: document.getElementById('simulator-container'),
       modeToggleBtn: document.getElementById('btn-mode-toggle'),
-      modeIcon: document.getElementById('mode-icon'),
+      modeIconSvg: document.getElementById('mode-icon-svg'),
       modeText: document.getElementById('mode-text'),
       audioGuideBtn: document.getElementById('btn-audio-guide'),
       snapshotBtn: document.getElementById('btn-snapshot'),
@@ -56,7 +56,7 @@ class AppController {
   }
 
   async init() {
-    console.log('Initializing Kitāb al-Shifāʾ WebAR with RDF...');
+    console.log('Initializing Alqami AR...');
     this._setupTabNavigation();
     this._setupModals();
     this._setupButtons();
@@ -87,11 +87,10 @@ class AppController {
     this.mode = 'camera';
     this.dom.arContainer.style.display = 'block';
     this.dom.simulatorContainer.style.display = 'none';
-    this.dom.modeIcon.textContent = '📷';
-    this.dom.modeText.textContent = 'AR Camera';
+    this.dom.modeText.textContent = 'Camera';
     this.dom.modeToggleBtn.classList.add('active');
 
-    this._setTrackingState(false, 'Scanning for Manuscript...');
+    this._setTrackingState(false, 'Scanning for manuscript');
 
     if (this.simulator) {
       this.simulator.destroy();
@@ -103,23 +102,23 @@ class AppController {
       this.arEngine = new AREngine(this.dom.arContainer, `${baseUrl}targets/manuscript.mind`);
 
       this.arEngine.onTargetFound = () => {
-        console.log('Target Detected in Real AR Camera!');
-        this._setTrackingState(true, '🎯 Target Tracked (Real AR · 60 FPS)');
+        console.log('Target Detected in AR Camera');
+        this._setTrackingState(true, 'Target Tracked · 60 FPS');
       };
 
       this.arEngine.onTargetLost = () => {
         console.log('Target Lost in AR Camera');
-        this._setTrackingState(false, '🔍 Scanning for Manuscript...');
+        this._setTrackingState(false, 'Scanning for manuscript');
       };
 
       this.arEngine.onError = (err) => {
-        console.warn('Camera AR unavailable, switching to Desktop Simulator:', err);
+        console.warn('Camera AR unavailable, switching to Simulator:', err);
         this._startSimulatorMode();
       };
 
       const { renderer, scene, camera, anchorGroup } = await this.arEngine.init();
 
-      // Create 3D Holographic Board, Hotspot Pins, and 3D AR Coordinates Frame
+      // Create Apple-style 3D Holographic Board, Hotspot Pins, and Frame
       this.cardManager = new ARCardManager(anchorGroup);
       this.cardManager.createHolographicCard(this.rdfParser.metadata);
       this.cardManager.createHotspots(this.rdfParser.hotspots);
@@ -146,8 +145,7 @@ class AppController {
     this.mode = 'simulator';
     this.dom.arContainer.style.display = 'none';
     this.dom.simulatorContainer.style.display = 'block';
-    this.dom.modeIcon.textContent = '🖥️';
-    this.dom.modeText.textContent = '3D Simulator';
+    this.dom.modeText.textContent = 'Simulator';
     this.dom.modeToggleBtn.classList.remove('active');
 
     if (this.arEngine) {
@@ -158,7 +156,7 @@ class AppController {
     this.simulator = new ManuscriptSimulator(
       this.dom.simulatorContainer,
       () => {
-        this._setTrackingState(true, '🎯 Target Tracked (Virtual 3D)');
+        this._setTrackingState(true, 'Target Tracked (3D)');
       },
       () => {
         this._setTrackingState(false, 'Target Not in View');
@@ -205,7 +203,7 @@ class AppController {
       this.dom.scanningHud.classList.add('hidden');
     } else {
       this.dom.trackingStatus.classList.remove('found');
-      this.dom.trackingText.textContent = message || 'Scanning for Manuscript...';
+      this.dom.trackingText.textContent = message || 'Scanning for manuscript';
       this.dom.scanningHud.classList.remove('hidden');
     }
   }
@@ -214,7 +212,7 @@ class AppController {
     if (!meta) return;
 
     this.dom.metaTitle.textContent = meta.title || '—';
-    this.dom.metaCreator.textContent = `${meta.creator || 'Ibn Sīnā'} (${meta.authorJob || ''})`;
+    this.dom.metaCreator.textContent = `${meta.creator || 'Ibn Sina'} (${meta.authorJob || ''})`;
     this.dom.metaDate.textContent = meta.date || '—';
     this.dom.metaPublisher.textContent = meta.publisher || '—';
     this.dom.metaMaterial.textContent = meta.material || '—';
@@ -270,7 +268,7 @@ class AppController {
     this.activeHotspot = hs;
     this.dom.modalTitle.textContent = hs.label;
     this.dom.modalBody.innerHTML = `
-      <p style="margin-bottom: 8px;"><strong>Location:</strong> <span style="color: var(--cyan-primary);">${hs.folio}</span></p>
+      <p style="margin-bottom: 8px;"><strong>Location:</strong> <span style="color: var(--apple-blue);">${hs.folio}</span></p>
       <p style="line-height: 1.6;">${hs.description}</p>
     `;
     this.dom.hotspotModal.classList.add('active');
@@ -288,7 +286,7 @@ class AppController {
 
     // Audio Guide Main
     this.dom.audioGuideBtn.addEventListener('click', () => {
-      const summary = `You are viewing the illuminated opening of Kitāb al-Shifāʾ, the Book of Healing, by the legendary Islamic polymath Ibn Sīnā, also known as Avicenna. This 16th to 17th century manuscript features an ornate lapis lazuli and gold headpiece, clear Naskh calligraphy, and the historical seal of the Iranian National Parliament Library.`;
+      const summary = `You are viewing the illuminated opening of Kitab al-Shifa, the Book of Healing, by the legendary Islamic polymath Ibn Sina, also known as Avicenna. This manuscript features an ornate lapis lazuli and gold headpiece, clear Naskh calligraphy, and the historical seal of the Iranian National Parliament Library.`;
       this.speech.toggle(summary, 'en');
     });
 
@@ -315,7 +313,7 @@ class AppController {
 
       if (targetCanvas) {
         const link = document.createElement('a');
-        link.download = `manuscript-ar-${Date.now()}.png`;
+        link.download = `alqami-${Date.now()}.png`;
         link.href = targetCanvas.toDataURL('image/png');
         link.click();
       }
@@ -337,7 +335,7 @@ class AppController {
           this.graphVisualizer.setData(this.rdfParser.getGraphData());
         }
 
-        alert('✨ AR Hologram and Metadata updated successfully from modified RDF!');
+        alert('AR Hologram and metadata updated successfully.');
       } catch (err) {
         alert(`RDF Syntax Error: ${err.message}`);
       }

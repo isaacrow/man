@@ -37,7 +37,7 @@ export class RDFGraphVisualizer {
         y: centerY + Math.sin(angle) * dist + (Math.random() - 0.5) * 20,
         vx: 0,
         vy: 0,
-        radius: n.group === 1 ? 22 : (n.group === 3 ? 16 : 12)
+        radius: n.group === 1 ? 20 : (n.group === 3 ? 14 : 10)
       };
     });
 
@@ -76,7 +76,6 @@ export class RDFGraphVisualizer {
     const centerX = this.width / 2;
     const centerY = this.height / 2;
 
-    // Node repulsion
     for (let i = 0; i < this.nodes.length; i++) {
       for (let j = i + 1; j < this.nodes.length; j++) {
         const dx = this.nodes[j].x - this.nodes[i].x;
@@ -98,7 +97,6 @@ export class RDFGraphVisualizer {
       }
     }
 
-    // Link attraction
     for (const link of this.links) {
       const dx = link.target.x - link.source.x;
       const dy = link.target.y - link.source.y;
@@ -118,12 +116,10 @@ export class RDFGraphVisualizer {
       }
     }
 
-    // Center gravity
     for (const node of this.nodes) {
       if (node !== this.dragNode) {
         node.x += (centerX - node.x) * 0.01;
         node.y += (centerY - node.y) * 0.01;
-        // Keep within bounds
         node.x = Math.max(30, Math.min(this.width - 30, node.x));
         node.y = Math.max(30, Math.min(this.height - 30, node.y));
       }
@@ -138,15 +134,14 @@ export class RDFGraphVisualizer {
       this.ctx.beginPath();
       this.ctx.moveTo(link.source.x, link.source.y);
       this.ctx.lineTo(link.target.x, link.target.y);
-      this.ctx.strokeStyle = 'rgba(0, 210, 255, 0.35)';
-      this.ctx.lineWidth = 1.5;
+      this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+      this.ctx.lineWidth = 1.2;
       this.ctx.stroke();
 
-      // Predicate label
       const midX = (link.source.x + link.target.x) / 2;
       const midY = (link.source.y + link.target.y) / 2;
-      this.ctx.font = '10px monospace';
-      this.ctx.fillStyle = 'rgba(218, 165, 32, 0.85)';
+      this.ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+      this.ctx.fillStyle = '#86868b';
       this.ctx.textAlign = 'center';
       this.ctx.fillText(link.predicate || '', midX, midY - 3);
     }
@@ -157,43 +152,29 @@ export class RDFGraphVisualizer {
       const isSelected = this.selectedNode === node;
 
       this.ctx.beginPath();
-      this.ctx.arc(node.x, node.y, node.radius + (isHovered ? 4 : 0), 0, Math.PI * 2);
+      this.ctx.arc(node.x, node.y, node.radius + (isHovered ? 3 : 0), 0, Math.PI * 2);
 
-      let grad = this.ctx.createRadialGradient(node.x, node.y, 2, node.x, node.y, node.radius);
       if (node.group === 1) {
-        // Main Resource (Gold)
-        grad.addColorStop(0, '#fff3b0');
-        grad.addColorStop(1, '#e5a93b');
-        this.ctx.fillStyle = grad;
-        this.ctx.shadowColor = '#e5a93b';
-        this.ctx.shadowBlur = isHovered ? 15 : 8;
+        // Main Resource (Black)
+        this.ctx.fillStyle = '#1d1d1f';
       } else if (node.group === 3) {
-        // Linked Entity (Cyan/Lapis)
-        grad.addColorStop(0, '#70d6ff');
-        grad.addColorStop(1, '#0077b6');
-        this.ctx.fillStyle = grad;
-        this.ctx.shadowColor = '#0077b6';
-        this.ctx.shadowBlur = isHovered ? 12 : 5;
+        // Linked Entity (Apple Blue)
+        this.ctx.fillStyle = '#0071e3';
       } else {
-        // Literal Value (Emerald)
-        grad.addColorStop(0, '#b7efc5');
-        grad.addColorStop(1, '#2d6a4f');
-        this.ctx.fillStyle = grad;
-        this.ctx.shadowColor = '#2d6a4f';
-        this.ctx.shadowBlur = isHovered ? 10 : 3;
+        // Literal Value (Apple Green)
+        this.ctx.fillStyle = '#34c759';
       }
 
       this.ctx.fill();
-      this.ctx.shadowBlur = 0;
 
       // Node border
-      this.ctx.strokeStyle = isSelected ? '#ffffff' : (isHovered ? '#ffd700' : 'rgba(255,255,255,0.4)');
-      this.ctx.lineWidth = isSelected ? 3 : 1.5;
+      this.ctx.strokeStyle = isSelected ? '#0071e3' : (isHovered ? '#1d1d1f' : '#ffffff');
+      this.ctx.lineWidth = isSelected ? 3 : 2;
       this.ctx.stroke();
 
       // Node label
-      this.ctx.font = node.group === 1 ? 'bold 11px sans-serif' : '10px sans-serif';
-      this.ctx.fillStyle = '#ffffff';
+      this.ctx.font = node.group === 1 ? '600 11px -apple-system, BlinkMacSystemFont, sans-serif' : '500 10px -apple-system, BlinkMacSystemFont, sans-serif';
+      this.ctx.fillStyle = '#1d1d1f';
       this.ctx.textAlign = 'center';
       const label = node.label || node.id;
       const truncated = label.length > 20 ? label.slice(0, 18) + '…' : label;
@@ -250,7 +231,6 @@ export class RDFGraphVisualizer {
       this.dragNode = null;
     });
 
-    // Touch support for mobile devices
     this.canvas.addEventListener('touchstart', (e) => {
       const pos = getPos(e);
       const node = findNode(pos);
