@@ -57,14 +57,6 @@
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
-
-          <button id="btn-help" class="btn-icon" title="Information">
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-          </button>
         </div>
       </header>
 
@@ -90,11 +82,11 @@
       <!-- Bottom Floating HUD Panel (Initially Collapsed until target is scanned) -->
       <div id="bottom-panel" class="bottom-panel-container collapsed">
         <div class="hud-panel">
-          <!-- Target Switcher (Active in Simulator or when target selected) -->
+          <!-- Target Switcher (Active in Simulator mode) -->
           <div id="target-switcher-wrapper" class="target-switcher-bar" style="display: none;">
             <div class="target-segmented-control">
-              <button class="target-btn active" data-target="0">Manuscript 1 (Kitab al-Shifa)</button>
-              <button class="target-btn" data-target="1">Manuscript 2 (Quran)</button>
+              <button class="target-btn active" data-target="0">Target 1: Al-Qabasat (Mir Damad)</button>
+              <button class="target-btn" data-target="1">Target 2: The Quran (Haydar Ali)</button>
             </div>
           </div>
 
@@ -122,7 +114,7 @@
                 <div id="meta-title" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
-                <div class="meta-label">Author / Origin (dc:creator)</div>
+                <div class="meta-label">Author / Scribe (dc:creator)</div>
                 <div id="meta-creator" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card">
@@ -134,7 +126,7 @@
                 <div id="meta-publisher" class="meta-value">Loading...</div>
               </div>
               <div class="meta-card" style="grid-column: 1 / -1;">
-                <div class="meta-label">Material & Technique (schema:material)</div>
+                <div class="meta-label">Material & Binding (schema:material)</div>
                 <div id="meta-material" class="meta-value">Loading...</div>
               </div>
             </div>
@@ -225,33 +217,6 @@
           <button id="btn-modal-action" class="btn-pill" style="background: #1d1d1f; color: #ffffff;">
             Listen to Description
           </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Help & About Modal Sheet -->
-    <div id="help-modal" class="modal-backdrop">
-      <div class="modal-dialog">
-        <div class="modal-header">
-          <div class="modal-title">About Alqami</div>
-          <button id="btn-close-help" class="btn-icon">
-            <svg viewBox="0 0 24 24">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p style="margin-bottom: 12px;"><strong>Alqami</strong> provides real-time augmented reality intelligence for historical manuscripts driven by semantic RDF graphs.</p>
-          <ul style="padding-left: 18px; margin-bottom: 16px; line-height: 1.6;">
-            <li><strong>Auto-Scan:</strong> Align either manuscript in your camera to reveal its 3D AR hologram and metadata panel.</li>
-            <li><strong>Multi-Target:</strong> Supports both <em>Kitab al-Shifa</em> (Avicenna) and the <em>Illuminated Quran</em>.</li>
-            <li><strong>Hotspot Anchors:</strong> Tap 3D markers on the manuscript to inspect codicological notes.</li>
-            <li><strong>Semantic Graph:</strong> View Dublin Core and CIDOC-CRM relations in real-time.</li>
-          </ul>
-          <p style="font-size: 12px; color: var(--apple-text-tertiary);">
-            Built with WebAR, Three.js, N3.js, and RDF Ontologies.
-          </p>
         </div>
       </div>
     </div>

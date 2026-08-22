@@ -94,7 +94,6 @@ export class RDFManuscriptParser {
   }
 
   _extractMetadata() {
-    // Find the main manuscript subject
     const manuscriptTypes = [
       'http://schema.org/Manuscript',
       'http://www.cidoc-crm.org/cidoc-crm/E22_Human-Made_Object',
@@ -119,23 +118,30 @@ export class RDFManuscriptParser {
     const titleAr = titles.find(t => t.language === 'ar')?.value || '';
     const titleFa = titles.find(t => t.language === 'fa')?.value || '';
 
-    const authorUri = this._getFirstValue(mainSubject, this.prefixes.dc + 'creator');
-    let authorName = 'Ibn Sīnā (Avicenna / ابن سینا)';
-    let authorJob = 'Polymath & Philosopher';
+    // Extract creators accurately
+    const creators = this._getValues(mainSubject, this.prefixes.dc + 'creator');
+    let creatorName = '';
+    let authorJob = '';
     let authorBio = '';
 
-    if (authorUri) {
-      const authorQuads = this.store.getQuads(N3.DataFactory.namedNode(authorUri), null, null, null);
-      for (const q of authorQuads) {
-        if (q.predicate.value === this.prefixes.rdfs + 'label' || q.predicate.value === this.prefixes.schema + 'name') {
-          authorName = q.object.value;
+    if (creators.length > 0) {
+      const firstCreator = creators[0].value;
+      if (firstCreator.startsWith('http')) {
+        const authorQuads = this.store.getQuads(N3.DataFactory.namedNode(firstCreator), null, null, null);
+        for (const q of authorQuads) {
+          if (q.predicate.value === this.prefixes.rdfs + 'label' || q.predicate.value === this.prefixes.schema + 'name') {
+            creatorName = q.object.value;
+          }
+          if (q.predicate.value === this.prefixes.schema + 'jobTitle') {
+            authorJob = q.object.value;
+          }
+          if (q.predicate.value === this.prefixes.schema + 'description') {
+            authorBio = q.object.value;
+          }
         }
-        if (q.predicate.value === this.prefixes.schema + 'jobTitle') {
-          authorJob = q.object.value;
-        }
-        if (q.predicate.value === this.prefixes.schema + 'description') {
-          authorBio = q.object.value;
-        }
+        if (!creatorName) creatorName = firstCreator;
+      } else {
+        creatorName = firstCreator;
       }
     }
 
@@ -144,17 +150,17 @@ export class RDFManuscriptParser {
       title: titleEn,
       titleArabic: titleAr,
       titlePersian: titleFa,
-      creator: authorName,
+      creator: creatorName || 'Master Scribe',
       authorJob,
       authorBio,
-      date: this._getFirstValue(mainSubject, this.prefixes.dc + 'date', '16th-17th Century CE'),
-      contributor: this._getFirstValue(mainSubject, this.prefixes.dc + 'contributor', 'Master Calligrapher & Royal Illuminator'),
+      date: this._getFirstValue(mainSubject, this.prefixes.dc + 'date', 'Historical Era'),
+      contributor: this._getFirstValue(mainSubject, this.prefixes.dc + 'contributor', ''),
       format: this._getFirstValue(mainSubject, this.prefixes.dc + 'format', 'Illuminated Codex'),
-      identifier: this._getFirstValue(mainSubject, this.prefixes.dc + 'identifier', 'MS-1302-MAJLIS'),
+      identifier: this._getFirstValue(mainSubject, this.prefixes.dc + 'identifier', ''),
       publisher: this._getFirstValue(mainSubject, this.prefixes.dc + 'publisher', 'Parliament Library of Iran'),
-      material: this._getFirstValue(mainSubject, this.prefixes.schema + 'material', 'Handmade rag paper, shell gold, lapis lazuli, iron gall ink'),
+      material: this._getFirstValue(mainSubject, this.prefixes.schema + 'material', 'Handmade paper, black ink'),
       dimensions: this._getFirstValue(mainSubject, this.prefixes.ms + 'dimensions', '26.5 cm x 17.2 cm'),
-      folioLayout: this._getFirstValue(mainSubject, this.prefixes.ms + 'folioLayout', 'Framed single-column with diagonal margins'),
+      folioLayout: this._getFirstValue(mainSubject, this.prefixes.ms + 'folioLayout', ''),
       transcriptionArabic: this._getFirstValue(mainSubject, this.prefixes.ms + 'transcriptionArabic', ''),
       translationEnglish: this._getFirstValue(mainSubject, this.prefixes.ms + 'translationEnglish', '')
     };
@@ -185,41 +191,22 @@ export class RDFManuscriptParser {
       });
     }
 
-    // Default hotspots if none found
     if (this.hotspots.length === 0) {
       this.hotspots = [
         {
           id: 'unwan',
-          label: 'Illuminated ʿUnwān Headpiece',
-          description: 'Lapis lazuli and 24K gold floral arabesque dome headpiece.',
+          label: 'Illuminated Opening',
+          description: 'Regal illumination and floral arabesque headpiece.',
           folio: 'Recto (Right)',
           normX: 0.72,
           normY: 0.22,
           elevZ: 0.08
         },
         {
-          id: 'basmala',
-          label: 'The Basmala Calligraphy',
-          description: 'Fine Thuluth invocation within gold cloudband cartouche.',
-          folio: 'Recto (Right)',
-          normX: 0.72,
-          normY: 0.42,
-          elevZ: 0.06
-        },
-        {
-          id: 'text',
-          label: 'Philosophical Treatise (Avicenna)',
-          description: 'Metaphysical discourse on origination (ibdāʿ) and cosmic formation.',
-          folio: 'Verso (Left)',
-          normX: 0.32,
-          normY: 0.38,
-          elevZ: 0.07
-        },
-        {
           id: 'seal',
-          label: 'Majlis Library Seal',
-          description: 'Historical ownership seal of National Parliament Library (1302 AH).',
-          folio: 'Recto Lower Right',
+          label: 'Library Accession Seal',
+          description: 'Historical ownership seal of Majlis Parliament Library.',
+          folio: 'Margin',
           normX: 0.88,
           normY: 0.82,
           elevZ: 0.05

@@ -26,7 +26,6 @@ class AppController {
       modeText: document.getElementById('mode-text'),
       audioGuideBtn: document.getElementById('btn-audio-guide'),
       snapshotBtn: document.getElementById('btn-snapshot'),
-      helpBtn: document.getElementById('btn-help'),
       trackingStatus: document.getElementById('tracking-status'),
       trackingText: document.getElementById('tracking-text'),
       scanningHud: document.getElementById('scanning-hud'),
@@ -51,8 +50,6 @@ class AppController {
       modalBody: document.getElementById('modal-body'),
       btnCloseModal: document.getElementById('btn-close-modal'),
       btnModalAction: document.getElementById('btn-modal-action'),
-      helpModal: document.getElementById('help-modal'),
-      btnCloseHelp: document.getElementById('btn-close-help'),
       cameraFlash: document.getElementById('camera-flash')
     };
   }
@@ -63,7 +60,7 @@ class AppController {
     this._setupModals();
     this._setupButtons();
 
-    // 1. Load both RDF datasets
+    // 1. Load both MARC21 RDF datasets
     try {
       const baseUrl = import.meta.env.BASE_URL || './';
       await Promise.all([
@@ -95,7 +92,6 @@ class AppController {
       this.graphVisualizer.setData(parser.getGraphData());
     }
 
-    // Update target switcher buttons
     this.dom.targetBtns.forEach(btn => {
       const btnIdx = parseInt(btn.getAttribute('data-target'), 10);
       btn.classList.toggle('active', btnIdx === targetIndex);
@@ -124,7 +120,7 @@ class AppController {
       this.arEngine.onTargetFound = (targetIndex) => {
         console.log(`Target ${targetIndex} Detected in AR Camera!`);
         this._displayTargetData(targetIndex);
-        const name = targetIndex === 0 ? 'Kitab al-Shifa' : 'Illuminated Quran';
+        const name = targetIndex === 0 ? 'Al-Qabasat (Mir Damad)' : 'The Quran (Haydar Ali)';
         this._setTrackingState(true, `${name} · 60 FPS`);
       };
 
@@ -140,7 +136,7 @@ class AppController {
 
       const { renderer, scene, camera, anchorGroups } = await this.arEngine.init();
 
-      // Create 3D Holograms for both Target 0 and Target 1
+      // Create 3D Holograms for Target 0 (Al-Qabasat) and Target 1 (The Quran)
       this.cardManagers = anchorGroups.map((group, index) => {
         const mgr = new ARCardManager(group);
         mgr.createHolographicCard(this.parsers[index].metadata);
@@ -180,7 +176,7 @@ class AppController {
       this.dom.simulatorContainer,
       (targetIndex) => {
         this._displayTargetData(targetIndex);
-        const name = targetIndex === 0 ? 'Kitab al-Shifa' : 'Illuminated Quran';
+        const name = targetIndex === 0 ? 'Al-Qabasat (Mir Damad)' : 'The Quran (Haydar Ali)';
         this._setTrackingState(true, `${name} (Virtual 3D)`);
       },
       () => {
@@ -227,14 +223,12 @@ class AppController {
       this.dom.trackingStatus.classList.add('found');
       this.dom.trackingText.textContent = message || 'Target Tracked';
       this.dom.scanningHud.classList.add('hidden');
-      // Reveal the bottom metadata HUD panel with smooth slide-up
       this.dom.bottomPanel.classList.remove('collapsed');
       this.dom.bottomPanel.classList.add('expanded');
     } else {
       this.dom.trackingStatus.classList.remove('found');
       this.dom.trackingText.textContent = message || 'Scanning for manuscript';
       this.dom.scanningHud.classList.remove('hidden');
-      // Collapse the bottom HUD panel back so the camera viewfinder is completely clear
       this.dom.bottomPanel.classList.add('collapsed');
       this.dom.bottomPanel.classList.remove('expanded');
     }
@@ -244,7 +238,7 @@ class AppController {
     if (!meta) return;
 
     this.dom.metaTitle.textContent = meta.title || '—';
-    this.dom.metaCreator.textContent = `${meta.creator || 'Master Scribe'} (${meta.authorJob || ''})`;
+    this.dom.metaCreator.textContent = meta.creator || 'Master Scribe';
     this.dom.metaDate.textContent = meta.date || '—';
     this.dom.metaPublisher.textContent = meta.publisher || '—';
     this.dom.metaMaterial.textContent = meta.material || '—';
@@ -286,14 +280,6 @@ class AppController {
         this.speech.speak(`${this.activeHotspot.label}. ${this.activeHotspot.description}`);
       }
     });
-
-    this.dom.helpBtn.addEventListener('click', () => {
-      this.dom.helpModal.classList.add('active');
-    });
-
-    this.dom.btnCloseHelp.addEventListener('click', () => {
-      this.dom.helpModal.classList.remove('active');
-    });
   }
 
   _openHotspotModal(hs) {
@@ -307,7 +293,6 @@ class AppController {
   }
 
   _setupButtons() {
-    // Mode toggle
     this.dom.modeToggleBtn.addEventListener('click', () => {
       if (this.mode === 'camera') {
         this._startSimulatorMode();
@@ -316,7 +301,6 @@ class AppController {
       }
     });
 
-    // Target Switcher in Simulator
     this.dom.targetBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         const targetIdx = parseInt(btn.getAttribute('data-target'), 10);
@@ -332,26 +316,22 @@ class AppController {
       });
     });
 
-    // Audio Guide Main
     this.dom.audioGuideBtn.addEventListener('click', () => {
       const meta = this.parsers[this.currentTargetIndex]?.metadata;
-      const summary = `You are viewing ${meta?.title || 'the historical manuscript'}. Material: ${meta?.material || 'Handmade paper'}. Holding repository: ${meta?.publisher || 'Majlis Parliament Library'}.`;
+      const summary = `You are viewing ${meta?.title || 'the manuscript'}. Author or scribe: ${meta?.creator || ''}. Period: ${meta?.date || ''}. Holding repository: ${meta?.publisher || 'Majlis Parliament Library'}.`;
       this.speech.toggle(summary, 'en');
     });
 
-    // Read Arabic text
     this.dom.btnReadAr.addEventListener('click', () => {
       const arText = this.dom.textArabic.textContent;
       this.speech.toggle(arText, 'ar');
     });
 
-    // Read English translation
     this.dom.btnReadEn.addEventListener('click', () => {
       const enText = this.dom.textEnglish.textContent;
       this.speech.toggle(enText, 'en');
     });
 
-    // Snapshot feature
     this.dom.snapshotBtn.addEventListener('click', () => {
       this.dom.cameraFlash.classList.add('flash');
       setTimeout(() => this.dom.cameraFlash.classList.remove('flash'), 200);
@@ -368,7 +348,6 @@ class AppController {
       }
     });
 
-    // RDF Live Editor: Apply
     this.dom.btnApplyRdf.addEventListener('click', async () => {
       try {
         const updatedTtl = this.dom.ttlEditor.value;
@@ -391,7 +370,6 @@ class AppController {
       }
     });
 
-    // RDF Live Editor: Reset
     this.dom.btnResetRdf.addEventListener('click', async () => {
       const parser = this.parsers[this.currentTargetIndex];
       this.dom.ttlEditor.value = parser.rawTurtle;

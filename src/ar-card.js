@@ -10,7 +10,6 @@ export class ARCardManager {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
-    // High-resolution canvas texture for the Apple VisionOS style frosted glass board
     this.cardCanvas = document.createElement('canvas');
     this.cardCanvas.width = 1024;
     this.cardCanvas.height = 700;
@@ -19,7 +18,6 @@ export class ARCardManager {
     this.cardTexture.minFilter = THREE.LinearFilter;
 
     this.cardMesh = null;
-    this.gridMesh = null;
     this.axesGroup = null;
     this.hotspotGroup = new THREE.Group();
     this.hologramGroup.add(this.hotspotGroup);
@@ -28,7 +26,6 @@ export class ARCardManager {
     this.currentMetadata = null;
     this.onHotspotClick = null;
 
-    // Build Apple-style minimal AR frame and coordinate axes
     this._createARSurfaceFrameAndAxes();
   }
 
@@ -55,12 +52,11 @@ export class ARCardManager {
       frameGroup.add(line);
     };
 
-    addCorner(-halfW, -halfH, 1, 1);    // Bottom-Left
-    addCorner(halfW, -halfH, -1, 1);    // Bottom-Right
-    addCorner(-halfW, halfH, 1, -1);    // Top-Left
-    addCorner(halfW, halfH, -1, -1);    // Top-Right
+    addCorner(-halfW, -halfH, 1, 1);
+    addCorner(halfW, -halfH, -1, 1);
+    addCorner(-halfW, halfH, 1, -1);
+    addCorner(halfW, halfH, -1, -1);
 
-    // Subtle hairline perimeter
     const perimeterGeo = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(-halfW, -halfH, 0.001),
       new THREE.Vector3(halfW, -halfH, 0.001),
@@ -83,17 +79,14 @@ export class ARCardManager {
     axes.position.set(-halfW - 0.04, -halfH - 0.04, 0.002);
     const axisLength = 0.15;
 
-    // X Axis (Red)
     const xGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(axisLength, 0, 0)]);
     const xMat = new THREE.LineBasicMaterial({ color: 0xff3b30, linewidth: 2 });
     axes.add(new THREE.Line(xGeo, xMat));
 
-    // Y Axis (Green)
     const yGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, axisLength, 0)]);
     const yMat = new THREE.LineBasicMaterial({ color: 0x34c759, linewidth: 2 });
     axes.add(new THREE.Line(yGeo, yMat));
 
-    // Z Axis (Blue Elevation)
     const zGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, axisLength)]);
     const zMat = new THREE.LineBasicMaterial({ color: 0x0071e3, linewidth: 2 });
     axes.add(new THREE.Line(zGeo, zMat));
@@ -107,7 +100,6 @@ export class ARCardManager {
     this._renderCardTexture(metadata);
 
     if (!this.cardMesh) {
-      // 3D Plane positioned floating above the top edge
       const geometry = new THREE.PlaneGeometry(0.96, 0.65);
       const material = new THREE.MeshBasicMaterial({
         map: this.cardTexture,
@@ -120,7 +112,6 @@ export class ARCardManager {
       this.cardMesh.position.set(0, 0.62, 0.15);
       this.cardMesh.rotation.x = -Math.PI * 0.11;
 
-      // Subtle frosted back shadow plane
       const shadowGeo = new THREE.PlaneGeometry(0.98, 0.67);
       const shadowMat = new THREE.MeshBasicMaterial({
         color: 0x000000,
@@ -131,7 +122,6 @@ export class ARCardManager {
       shadowMesh.position.z = -0.003;
       this.cardMesh.add(shadowMesh);
 
-      // Clean anchor tether line
       const lineGeo = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0, -0.325, 0),
         new THREE.Vector3(0, -0.62, -0.15)
@@ -162,12 +152,11 @@ export class ARCardManager {
     this._roundRect(ctx, 16, 16, w - 32, h - 32, 28);
     ctx.fill();
 
-    // Subtle border
     ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Top Header Badge
+    // Header Badge
     ctx.fillStyle = 'rgba(0, 113, 227, 0.08)';
     this._roundRect(ctx, 42, 38, 200, 36, 18);
     ctx.fill();
@@ -180,13 +169,14 @@ export class ARCardManager {
     ctx.font = '500 13px monospace';
     ctx.fillStyle = '#86868b';
     ctx.textAlign = 'right';
-    ctx.fillText(meta?.identifier || 'MS-SHIFA-1302', w - 45, 61);
+    ctx.fillText(meta?.identifier || 'MS-MARC21', w - 45, 61);
     ctx.textAlign = 'left';
 
     // Title (English)
     ctx.font = '600 28px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.fillStyle = '#1d1d1f';
-    ctx.fillText(meta?.title || 'Kitab al-Shifa: Logic and Metaphysics', 45, 118);
+    const titleText = meta?.title || 'Manuscript Title';
+    ctx.fillText(titleText.length > 36 ? titleText.slice(0, 34) + '…' : titleText, 45, 118);
 
     // Arabic Subtitle
     if (meta?.titleArabic) {
@@ -215,13 +205,13 @@ export class ARCardManager {
       ctx.fillText(truncated, x, y + 22);
     };
 
-    drawProp('Author (dc:creator)', meta?.creator || 'Ibn Sina (Avicenna)', 45, 218);
-    drawProp('Period (dc:date)', meta?.date || '16th-17th Century', 520, 218);
+    drawProp('Author / Scribe (dc:creator)', meta?.creator || 'Master Scribe', 45, 218);
+    drawProp('Period (dc:date)', meta?.date || 'Historical Period', 520, 218);
 
-    drawProp('Material (schema:material)', meta?.material || 'Gold leaf, Lapis lazuli, Rag paper', 45, 290);
+    drawProp('Material & Binding', meta?.material || 'Handmade paper, leather', 45, 290);
     drawProp('Holding Repository', meta?.publisher || 'Majlis Parliament Library', 520, 290);
 
-    drawProp('Script Style', 'Naskh text with Marginal Nastaliq', 45, 362);
+    drawProp('Extent & Layout', meta?.format || 'Illuminated Codex', 45, 362);
     drawProp('Dimensions', meta?.dimensions || '26.5 x 17.2 cm', 520, 362);
 
     // Bottom Quote / Transcription Box
@@ -231,17 +221,18 @@ export class ARCardManager {
 
     ctx.font = '600 11px monospace';
     ctx.fillStyle = '#86868b';
-    ctx.fillText('ONTOLOGY TRANSCRIPTION (dc:description)', 65, 448);
+    ctx.fillText('ONTOLOGY TRANSCRIPTION (dc:description / ms:transcriptionArabic)', 65, 448);
 
-    ctx.font = '16px "Amiri", "Traditional Arabic", serif';
+    ctx.font = '15px "Amiri", "Traditional Arabic", serif';
     ctx.fillStyle = '#1d1d1f';
-    ctx.fillText('« بسم الله الرحمن الرحيم - الحمد لله الواحد الأحد الصمد المصور... »', 65, 484);
+    const arText = meta?.transcriptionArabic ? meta.transcriptionArabic.slice(0, 90) + '...' : '« بسم الله الرحمن الرحيم... »';
+    ctx.fillText(arText, 65, 484);
 
-    ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.font = '13px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.fillStyle = '#6e6e73';
-    ctx.fillText('"In the Name of God... origination (ibda) and cosmic formation (takwin)..."', 65, 516);
+    const enText = meta?.translationEnglish ? meta.translationEnglish.slice(0, 100) + '...' : 'Manuscript transcription...';
+    ctx.fillText(enText, 65, 516);
 
-    // Tracking Status Footer
     ctx.font = '600 12px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.fillStyle = '#34c759';
     ctx.fillText('Tracking Active (60 FPS)', 65, 550);
@@ -282,7 +273,6 @@ export class ARCardManager {
       group.position.set(posX, posY, posZ);
       group.userData = { hotspot: hs, index: idx };
 
-      // 1. Subtle White Vertical Laser Line
       const beamGeo = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0, 0, 0),
         new THREE.Vector3(0, 0, -posZ)
@@ -296,7 +286,6 @@ export class ARCardManager {
       const beam = new THREE.Line(beamGeo, beamMat);
       group.add(beam);
 
-      // 2. Base Surface Ring on Manuscript
       const ringGeo = new THREE.RingGeometry(0.018, 0.032, 24);
       const ringMat = new THREE.MeshBasicMaterial({
         color: 0x0071e3,
@@ -308,7 +297,6 @@ export class ARCardManager {
       ring.position.z = -posZ + 0.001;
       group.add(ring);
 
-      // 3. Apple Minimal 3D Sphere / Pin Marker
       const pinGeo = new THREE.SphereGeometry(0.024, 24, 24);
       const pinMat = new THREE.MeshStandardMaterial({
         color: 0xffffff,
@@ -321,7 +309,6 @@ export class ARCardManager {
       pinMesh.name = 'pinMesh';
       group.add(pinMesh);
 
-      // 4. Clean White Billboard Label
       const labelCanvas = document.createElement('canvas');
       labelCanvas.width = 360;
       labelCanvas.height = 84;
