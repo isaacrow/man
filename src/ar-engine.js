@@ -17,7 +17,6 @@ export class AREngine {
 
   async init() {
     try {
-      // Check camera permission availability
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera API (getUserMedia) not supported in this browser. Please ensure HTTPS is enabled or use Chrome/Safari.');
       }
@@ -35,22 +34,21 @@ export class AREngine {
 
       const { renderer, scene, camera } = this.mindarThree;
 
-      // Enable realistic color space
       if (renderer.outputEncoding !== undefined) {
         renderer.outputEncoding = THREE.sRGBEncoding;
       }
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.1;
 
-      // Add atmospheric lighting to the AR scene
-      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+      // Lighting for AR 3D models
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
       scene.add(ambientLight);
 
-      const dirLight = new THREE.DirectionalLight(0xffeedd, 1.5);
-      dirLight.position.set(1, 2, 2);
+      const dirLight = new THREE.DirectionalLight(0xffeedd, 1.8);
+      dirLight.position.set(1, 3, 2);
       scene.add(dirLight);
 
-      const pointLight = new THREE.PointLight(0x00d2ff, 1.5, 5);
+      const pointLight = new THREE.PointLight(0x00d2ff, 2.0, 8);
       pointLight.position.set(0, 1, 1);
       scene.add(pointLight);
 
@@ -80,11 +78,18 @@ export class AREngine {
     }
   }
 
-  async start() {
+  async start(onFrameUpdate) {
     if (!this.mindarThree) return;
     try {
       await this.mindarThree.start();
       this.isRunning = true;
+
+      // Start the official Three.js animation render loop
+      const { renderer, scene, camera } = this.mindarThree;
+      renderer.setAnimationLoop(() => {
+        if (onFrameUpdate) onFrameUpdate();
+        renderer.render(scene, camera);
+      });
     } catch (err) {
       console.error('Error starting MindAR:', err);
       if (this.onError) this.onError(err);
@@ -93,9 +98,15 @@ export class AREngine {
   }
 
   stop() {
-    if (this.mindarThree && this.isRunning) {
+    if (this.mindarThree) {
       try {
-        this.mindarThree.stop();
+        const { renderer } = this.mindarThree;
+        if (renderer) {
+          renderer.setAnimationLoop(null);
+        }
+        if (this.isRunning) {
+          this.mindarThree.stop();
+        }
       } catch (e) {
         console.warn('Error during MindAR stop:', e);
       }

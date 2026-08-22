@@ -16,7 +16,7 @@ class AppController {
     this.graphVisualizer = null;
     this.rawInitialTtl = '';
     this.activeHotspot = null;
-    this.clock = null;
+    this.lastTime = performance.now();
 
     // DOM Elements
     this.dom = {
@@ -56,7 +56,7 @@ class AppController {
   }
 
   async init() {
-    console.log('Initializing Manuscript WebAR with RDF...');
+    console.log('Initializing Kitāb al-Shifāʾ WebAR with RDF...');
     this._setupTabNavigation();
     this._setupModals();
     this._setupButtons();
@@ -79,7 +79,7 @@ class AppController {
       console.error('Failed to load initial RDF:', err);
     }
 
-    // 2. Initialize AR Engine by default, or fallback gracefully to Simulator
+    // 2. Initialize AR Camera mode
     await this._startCameraMode();
   }
 
@@ -103,33 +103,41 @@ class AppController {
       this.arEngine = new AREngine(this.dom.arContainer, `${baseUrl}targets/manuscript.mind`);
 
       this.arEngine.onTargetFound = () => {
-        console.log('Target Detected in AR Camera!');
-        this._setTrackingState(true, 'Target Tracked (60 FPS)');
+        console.log('Target Detected in Real AR Camera!');
+        this._setTrackingState(true, '🎯 Target Tracked (Real AR · 60 FPS)');
       };
 
       this.arEngine.onTargetLost = () => {
-        console.log('Target Lost');
-        this._setTrackingState(false, 'Scanning for Manuscript...');
+        console.log('Target Lost in AR Camera');
+        this._setTrackingState(false, '🔍 Scanning for Manuscript...');
       };
 
       this.arEngine.onError = (err) => {
-        console.warn('Camera AR unavailable or permission denied, switching to Simulator mode:', err);
+        console.warn('Camera AR unavailable, switching to Desktop Simulator:', err);
         this._startSimulatorMode();
       };
 
       const { renderer, scene, camera, anchorGroup } = await this.arEngine.init();
 
-      // Initialize 3D Holographic Board and Pins
+      // Create 3D Holographic Board, Hotspot Pins, and 3D AR Coordinates Frame
       this.cardManager = new ARCardManager(anchorGroup);
       this.cardManager.createHolographicCard(this.rdfParser.metadata);
       this.cardManager.createHotspots(this.rdfParser.hotspots);
 
-      // Start video tracking loop
-      await this.arEngine.start();
+      // Start AR tracking and animation loop
+      this.lastTime = performance.now();
+      await this.arEngine.start(() => {
+        const now = performance.now();
+        const delta = (now - this.lastTime) / 1000;
+        this.lastTime = now;
+        if (this.cardManager) {
+          this.cardManager.update(delta);
+        }
+      });
+
       this._setupInteractionRaycasting(renderer.domElement, camera);
-      this._startRenderLoop();
     } catch (err) {
-      console.warn('Camera failed, switching to Desktop Simulator:', err);
+      console.warn('Camera AR init failed, switching to Desktop Simulator:', err);
       this._startSimulatorMode();
     }
   }
@@ -150,7 +158,7 @@ class AppController {
     this.simulator = new ManuscriptSimulator(
       this.dom.simulatorContainer,
       () => {
-        this._setTrackingState(true, 'Target Tracked (Virtual 3D)');
+        this._setTrackingState(true, '🎯 Target Tracked (Virtual 3D)');
       },
       () => {
         this._setTrackingState(false, 'Target Not in View');
@@ -165,21 +173,6 @@ class AppController {
     this.cardManager.createHotspots(this.rdfParser.hotspots);
 
     this._setupInteractionRaycasting(this.simulator.renderer.domElement, camera);
-    this._startRenderLoop();
-  }
-
-  _startRenderLoop() {
-    let lastTime = performance.now();
-    const loop = (time) => {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
-
-      if (this.cardManager) {
-        this.cardManager.update(delta);
-      }
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
   }
 
   _setupInteractionRaycasting(domElement, camera) {
@@ -316,7 +309,6 @@ class AppController {
       this.dom.cameraFlash.classList.add('flash');
       setTimeout(() => this.dom.cameraFlash.classList.remove('flash'), 200);
 
-      // Capture canvas
       const targetCanvas = this.mode === 'camera' 
         ? this.dom.arContainer.querySelector('canvas') 
         : this.dom.simulatorContainer.querySelector('canvas');
