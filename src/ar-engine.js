@@ -40,7 +40,7 @@ export class AREngine {
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.1;
 
-      // Lighting for AR 3D models
+      // Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
       scene.add(ambientLight);
 
@@ -52,10 +52,12 @@ export class AREngine {
       pointLight.position.set(0, 1, 1);
       scene.add(pointLight);
 
-      // Support Target 0 (Manuscript 1) and Target 1 (Manuscript 2)
+      // Support 4 targets: 0 (Al-Qabasat), 1 (Quran Haydar Ali), 2 (Ilal al-Sharayi'), 3 (Kufic Quran Zayn al-Abidin)
       this.anchors = [
         this.mindarThree.addAnchor(0),
-        this.mindarThree.addAnchor(1)
+        this.mindarThree.addAnchor(1),
+        this.mindarThree.addAnchor(2),
+        this.mindarThree.addAnchor(3)
       ];
 
       this.anchors.forEach((anchor, index) => {

@@ -46,7 +46,6 @@ export class ManuscriptSimulator {
     rimLight.position.set(-2, 2, -1);
     this.scene.add(rimLight);
 
-    // Studio grid
     const grid = new THREE.GridHelper(5, 20, 0xd2d2d7, 0xe5e5ea);
     grid.position.y = -0.01;
     this.scene.add(grid);
@@ -59,7 +58,13 @@ export class ManuscriptSimulator {
   loadTarget(targetIndex = 0) {
     this.currentTargetIndex = targetIndex;
     const baseUrl = import.meta.env.BASE_URL || './';
-    const imageSrc = targetIndex === 0 ? `${baseUrl}manuscript.jpg` : `${baseUrl}manuscript2.jpg`;
+    const imageMap = [
+      `${baseUrl}manuscript.jpg`,
+      `${baseUrl}manuscript2.jpg`,
+      `${baseUrl}manuscript3.jpg`,
+      `${baseUrl}manuscript4.jpg`
+    ];
+    const imageSrc = imageMap[targetIndex] || imageMap[0];
 
     if (this.manuscriptMesh) {
       this.anchorGroup.remove(this.manuscriptMesh);

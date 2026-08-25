@@ -6,35 +6,32 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function testRdf() {
-  console.log('=== RDF PARSER ACCURACY VALIDATION ===');
+  console.log('=== 4-TARGET RDF PARSER ACCURACY VALIDATION ===');
 
-  // Test Manuscript 1
-  const ttl1 = fs.readFileSync(path.resolve(__dirname, '../data/manuscript.ttl'), 'utf8');
-  const parser1 = new RDFManuscriptParser();
-  const res1 = await parser1.parseTurtle(ttl1);
+  const files = [
+    { name: 'Target 1: Al-Qabasat (MS 4662)', file: 'manuscript.ttl' },
+    { name: 'Target 2: Quran Haydar Ali (MS 4175)', file: 'manuscript2.ttl' },
+    { name: 'Target 3: Ilal al-Sharayi (MS 4433)', file: 'manuscript3.ttl' },
+    { name: 'Target 4: Kufic Quran Zayn al-Abidin (MS 176854)', file: 'manuscript4.ttl' }
+  ];
 
-  console.log('\n--- TARGET 1: MANUSCRIPT 1 (MARC21: b125923 / 4662) ---');
-  console.log(`Title (English): ${res1.metadata.title}`);
-  console.log(`Title (Arabic): ${res1.metadata.titleArabic}`);
-  console.log(`Author / Creator: ${res1.metadata.creator}`);
-  console.log(`Date: ${res1.metadata.date}`);
-  console.log(`Material: ${res1.metadata.material}`);
-  console.log(`Holding Repository: ${res1.metadata.publisher}`);
+  for (const item of files) {
+    const ttl = fs.readFileSync(path.resolve(__dirname, `../data/${item.file}`), 'utf8');
+    const parser = new RDFManuscriptParser();
+    const res = await parser.parseTurtle(ttl);
 
-  // Test Manuscript 2
-  const ttl2 = fs.readFileSync(path.resolve(__dirname, '../data/manuscript2.ttl'), 'utf8');
-  const parser2 = new RDFManuscriptParser();
-  const res2 = await parser2.parseTurtle(ttl2);
+    console.log(`\n--- ${item.name} ---`);
+    console.log(`Title (English): ${res.metadata.title}`);
+    console.log(`Title (Arabic): ${res.metadata.titleArabic}`);
+    console.log(`Creator: ${res.metadata.creator}`);
+    console.log(`Date: ${res.metadata.date}`);
+    console.log(`Format: ${res.metadata.format}`);
+    console.log(`Material: ${res.metadata.material}`);
+    console.log(`Repository: ${res.metadata.publisher}`);
+    console.log(`Hotspots Count: ${res.hotspots.length}`);
+  }
 
-  console.log('\n--- TARGET 2: MANUSCRIPT 2 (MARC21: b125999 / 4175) ---');
-  console.log(`Title (English): ${res2.metadata.title}`);
-  console.log(`Title (Arabic): ${res2.metadata.titleArabic}`);
-  console.log(`Scribe / Creator: ${res2.metadata.creator}`);
-  console.log(`Date: ${res2.metadata.date}`);
-  console.log(`Material: ${res2.metadata.material}`);
-  console.log(`Holding Repository: ${res2.metadata.publisher}`);
-
-  console.log('\n=== VALIDATION COMPLETED SUCCESSFULLY ===');
+  console.log('\n=== ALL 4 TARGETS VALIDATED SUCCESSFULLY ===');
 }
 
 testRdf().catch(console.error);

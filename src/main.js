@@ -8,7 +8,12 @@ import { ManuscriptSpeechEngine } from './speech.js';
 class AppController {
   constructor() {
     this.mode = 'camera';
-    this.parsers = [new RDFManuscriptParser(), new RDFManuscriptParser()];
+    this.parsers = [
+      new RDFManuscriptParser(),
+      new RDFManuscriptParser(),
+      new RDFManuscriptParser(),
+      new RDFManuscriptParser()
+    ];
     this.speech = new ManuscriptSpeechEngine();
     this.arEngine = null;
     this.simulator = null;
@@ -17,6 +22,13 @@ class AppController {
     this.currentTargetIndex = 0;
     this.activeHotspot = null;
     this.lastTime = performance.now();
+
+    this.targetNames = [
+      'Al-Qabasat (Mir Damad)',
+      'The Quran (Haydar Ali)',
+      'Ilal al-Sharayi (Al-Saduq)',
+      'Kufic Quran (Zayn al-Abidin)'
+    ];
 
     // DOM Elements
     this.dom = {
@@ -55,17 +67,19 @@ class AppController {
   }
 
   async init() {
-    console.log('Initializing Alqami Multi-Target AR...');
+    console.log('Initializing Alqami 4-Target AR...');
     this._setupTabNavigation();
     this._setupModals();
     this._setupButtons();
 
-    // 1. Load both MARC21 RDF datasets
+    // 1. Load all 4 MARC21 RDF datasets
     try {
       const baseUrl = import.meta.env.BASE_URL || './';
       await Promise.all([
         this.parsers[0].loadFromUrl(`${baseUrl}data/manuscript.ttl`),
-        this.parsers[1].loadFromUrl(`${baseUrl}data/manuscript2.ttl`)
+        this.parsers[1].loadFromUrl(`${baseUrl}data/manuscript2.ttl`),
+        this.parsers[2].loadFromUrl(`${baseUrl}data/manuscript3.ttl`),
+        this.parsers[3].loadFromUrl(`${baseUrl}data/manuscript4.ttl`)
       ]);
 
       this._displayTargetData(0);
@@ -120,7 +134,7 @@ class AppController {
       this.arEngine.onTargetFound = (targetIndex) => {
         console.log(`Target ${targetIndex} Detected in AR Camera!`);
         this._displayTargetData(targetIndex);
-        const name = targetIndex === 0 ? 'Al-Qabasat (Mir Damad)' : 'The Quran (Haydar Ali)';
+        const name = this.targetNames[targetIndex] || `Target ${targetIndex + 1}`;
         this._setTrackingState(true, `${name} · 60 FPS`);
       };
 
@@ -136,11 +150,13 @@ class AppController {
 
       const { renderer, scene, camera, anchorGroups } = await this.arEngine.init();
 
-      // Create 3D Holograms for Target 0 (Al-Qabasat) and Target 1 (The Quran)
+      // Create 3D Holograms for all 4 targets
       this.cardManagers = anchorGroups.map((group, index) => {
         const mgr = new ARCardManager(group);
-        mgr.createHolographicCard(this.parsers[index].metadata);
-        mgr.createHotspots(this.parsers[index].hotspots);
+        if (this.parsers[index] && this.parsers[index].metadata) {
+          mgr.createHolographicCard(this.parsers[index].metadata);
+          mgr.createHotspots(this.parsers[index].hotspots);
+        }
         return mgr;
       });
 
@@ -176,7 +192,7 @@ class AppController {
       this.dom.simulatorContainer,
       (targetIndex) => {
         this._displayTargetData(targetIndex);
-        const name = targetIndex === 0 ? 'Al-Qabasat (Mir Damad)' : 'The Quran (Haydar Ali)';
+        const name = this.targetNames[targetIndex] || `Target ${targetIndex + 1}`;
         this._setTrackingState(true, `${name} (Virtual 3D)`);
       },
       () => {

@@ -1,0 +1,93 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <http://schema.org/> .
+@prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix ms: <https://w3id.org/manuscript-ar/ontology#> .
+
+# ==============================================================================
+# MANUSCRIPT 4: EARLY KUFIC QUR'AN ON GAZELLE PARCHMENT (ATTRIBUTED TO IMAM ZAYN AL-ABIDIN)
+# ==============================================================================
+
+<https://w3id.org/manuscript-ar/item/MS-KUFIC-176854> a schema:Manuscript, crm:E22_Human-Made_Object, edm:ProvidedCHO ;
+    # Dublin Core Metadata from MARC21 Catalog Record
+    dc:title "Early Kufic Qur'an on Gazelle Parchment (Surah Al-Kahf)"@en ;
+    dc:title "مصحف كوفي قديم على رق الغزال (منسوب للإمام زين العابدين ع)"@ar ;
+    dc:creator "Attributed to Imam Ali ibn al-Husayn Zayn al-Abidin (p, 38-95 AH / 659-713 CE)"@en ;
+    dc:creator "ينسب للإمام زين العابدين علي بن الحسين (عليهما السلام، 38-95 هـ)"@ar ;
+    dc:date "3rd Century AH / 800-899 CE [200-299 هـ]"@en ;
+    dc:date "[200-299] هـ. = [800-899 م]"@ar ;
+    dc:language "ar" ;
+    dc:format "40 folios (7 lines per page, oblong format: 26.5 x 37 cm)"@en ;
+    dc:type "Early Kufic Sacred Parchment Codex (Mushaf)"@en ;
+    dc:identifier "MS-176854 (Sirsi b176854 / BP100.3 b800)" ;
+    dc:publisher "Al-Abbas Holy Shrine Library Collection (مكتبة العتبة العباسية المقدسة)"@en ;
+    dc:publisher "مكتبة العتبة العباسية المقدسة"@ar ;
+    dc:rights <http://creativecommons.org/publicdomain/mark/1.0/> ;
+    
+    # Codicological Attributes from MARC21 340, 500, 561, 563
+    schema:material "Light yellow gazelle parchment (Raqq Ghazal), brown-black carbon ink, red vocalization dots, shell gold rosettes"@en ;
+    schema:material "رق غزال اصفر فاتح، حبر اسود مائل للقهوائي، نقط اعراب حمراء، فواصل ذهبية"@ar ;
+    schema:artform "Early Monumental Kufic Calligraphy on Parchment (خط الكوفي القديم)"@en ;
+    schema:artform "خط كوفي قديم مع نقط الإعراب الحمراء وفواصل الآيات بماء الذهب"@ar ;
+    
+    ms:dimensions "40 folios, 7 lines per page (26.5 cm x 37.0 cm oblong)" ;
+    ms:binding "Red gold-framed leather with blind and gilt tooling (جلد احمر مؤطر بالذهب)"@en ;
+    ms:rulingTechnique "Early horizontal oblong baseline without modern ruling board"@en ;
+    
+    # Incipit & Explicit from MARC21 Field 500 & Folio Text
+    ms:transcriptionArabic """مصحف شريف كتب على رق الغزال بالخط الكوفي القديم، مع نقاط الإعراب الحمراء (نظام أبي الأسود الدؤلي) وفواصل الآيات المنقوشة بماء الذهب. ينسب إلى الإمام زين العابدين علي بن الحسين (ع).
+
+النص المعروض في هذه الورقة (سورة الكهف: 37-39):
+« بِٱلَّذِي خَلَقَكَ مِن تُرَابٖ ثُمَّ مِن نُّطۡفَةٖ ثُمَّ سَوَّىٰكَ رَجُلٗا • لَّٰكِنَّا۠ هُوَ ٱللَّهُ رَبِّي وَلَآ أُشۡرِكُ بِرَبِّيٓ أَحَدٗا • وَلَوۡلَآ إِذۡ دَخَلۡتَ جَنَّتَكَ قُلۡتَ مَا شَآءَ ٱللَّهُ لَا قُوَّةَ إِلَّا بِٱللَّهِۚ إِن تَرَنِ »"""@ar ;
+    
+    ms:translationEnglish """Early Kufic Qur'anic codex written on light yellow gazelle parchment (Raqq Ghazāl) with red vocalization dots (system of Abū al-Aswad al-Du'alī) and gold rosette verse dividers. Attributed to Imam Zayn al-Abidin Ali ibn al-Husayn (p).
+
+Text on this folio (Surah Al-Kahf 18:37-39):
+"...in Him who created you from dust, then from a drop of fluid, then fashioned you into a man? But as for me, He is Allah, my Lord, and I associate none with my Lord. And why did you not say, when you entered your garden: 'As Allah willed! There is no power except in Allah!' If you see me as less than you..." """@en ;
+    
+    # Hotspots
+    ms:hasHotspot ms:HotspotKuficScript, ms:HotspotRedDots, ms:HotspotGoldRosette, ms:HotspotParchmentOrigin .
+
+# ==============================================================================
+# SPATIAL HOTSPOTS FOR MANUSCRIPT 4
+# ==============================================================================
+
+ms:HotspotKuficScript a ms:SpatialHotspot ;
+    rdfs:label "Early Monumental Kufic Script"@en ;
+    rdfs:label "الخط الكوفي القديم المجرد"@ar ;
+    ms:targetFolio "Central Folio Lines"@en ;
+    ms:normalizedX 0.50 ;
+    ms:normalizedY 0.42 ;
+    ms:elevationZ 0.07 ;
+    dc:description "Early Abbasid/Umayyad period monumental Kufic script written with a wide reed pen in brown-black carbon ink."@en .
+
+ms:HotspotRedDots a ms:SpatialHotspot ;
+    rdfs:label "Red Vocalization Dots (I'rāb)"@en ;
+    rdfs:label "نقط الإعراب الحمراء (نظام الدؤلي)"@ar ;
+    ms:targetFolio "Upper Line Diacritics"@en ;
+    ms:normalizedX 0.72 ;
+    ms:normalizedY 0.22 ;
+    ms:elevationZ 0.06 ;
+    dc:description "Historical red dots indicating short vowels (fathah, dammah, kasrah) preceding the invention of modern Harakat."@en .
+
+ms:HotspotGoldRosette a ms:SpatialHotspot ;
+    rdfs:label "Gold Rosette Verse Divider"@en ;
+    rdfs:label "فاصلة آية منقوشة بماء الذهب"@ar ;
+    ms:targetFolio "Line 3 Verse Break"@en ;
+    ms:normalizedX 0.74 ;
+    ms:normalizedY 0.38 ;
+    ms:elevationZ 0.08 ;
+    dc:description "Intricate 6-petal circular rosette rendered in pure shell gold water (Mā' al-Dhahab) marking the end of the ayah."@en .
+
+ms:HotspotParchmentOrigin a ms:SpatialHotspot ;
+    rdfs:label "Gazelle Parchment & Royal Provenance"@en ;
+    rdfs:label "رق غزال وتملك فتح علي شاه قاجار"@ar ;
+    ms:targetFolio "Parchment Margin & Edge"@en ;
+    ms:normalizedX 0.20 ;
+    ms:normalizedY 0.78 ;
+    ms:elevationZ 0.05 ;
+    dc:description "High-grade stretched gazelle vellum bearing royal accession marks of the Qajar Shah Fath-Ali Shah (d. 1250 AH)."@en .

@@ -46,6 +46,8 @@ async function compileManuscripts() {
 
   const img1Path = path.resolve(__dirname, '../manuscript.jpg');
   const img2Path = path.resolve(__dirname, '../manuscript2.jpg');
+  const img3Path = path.resolve(__dirname, '../manuscript3.jpg');
+  const img4Path = path.resolve(__dirname, '../manuscript4.jpg');
 
   console.log(`Loading Target 1: ${img1Path}...`);
   const image1 = await loadImage(img1Path);
@@ -53,21 +55,26 @@ async function compileManuscripts() {
   console.log(`Loading Target 2: ${img2Path}...`);
   const image2 = await loadImage(img2Path);
 
-  const compiler = new NodeCompiler();
-  console.log('Compiling both manuscripts into multi-target targets.mind descriptor...');
+  console.log(`Loading Target 3: ${img3Path}...`);
+  const image3 = await loadImage(img3Path);
 
-  await compiler.compileImageTargets([image1, image2], (progress) => {
+  console.log(`Loading Target 4: ${img4Path}...`);
+  const image4 = await loadImage(img4Path);
+
+  const compiler = new NodeCompiler();
+  console.log('Compiling 4 manuscripts into multi-target targets.mind descriptor...');
+
+  await compiler.compileImageTargets([image1, image2, image3, image4], (progress) => {
     process.stdout.write(`\rProgress: ${progress.toFixed(1)}%`);
   });
 
-  console.log('\nExporting multi-target buffer...');
+  console.log('\nExporting 4-target buffer...');
   const buffer = compiler.exportData();
 
   const outputPath = path.join(outputDir, 'targets.mind');
   fs.writeFileSync(outputPath, Buffer.from(buffer));
-  console.log(`Successfully saved multi-target descriptor to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
+  console.log(`Successfully saved 4-target descriptor to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
 
-  // Also write manuscript.mind as alias for backwards compatibility
   const singlePath = path.join(outputDir, 'manuscript.mind');
   fs.writeFileSync(singlePath, Buffer.from(buffer));
 }

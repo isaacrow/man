@@ -1,0 +1,92 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <http://schema.org/> .
+@prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix ms: <https://w3id.org/manuscript-ar/ontology#> .
+
+# ==============================================================================
+# MANUSCRIPT 3: ILAL AL-SHARAYI' WA AL-AHKAM (AL-SHAYKH AL-SADUQ, 311-381 AH)
+# ==============================================================================
+
+<https://w3id.org/manuscript-ar/item/MS-ILAL-4433> a schema:Manuscript, crm:E22_Human-Made_Object, edm:ProvidedCHO ;
+    # Dublin Core Metadata from MARC21 Catalog Record
+    dc:title "ʿIlal al-Sharāyiʿ wa al-Aḥkām (The Reasons of Religious Ordinances)"@en ;
+    dc:title "علل الشرايع والأحكام للشيخ الصدوق أبي جعفر محمد بن علي بن بابويه القمي"@ar ;
+    dc:creator "Al-Shaykh al-Ṣadūq (Ibn Bābawayh al-Qummī, 311-381 AH / 923-991 CE)"@en ;
+    dc:creator "ابن بابويه، محمد بن علي بن الحسين (الشيخ الصدوق، 311-381 هـ)"@ar ;
+    dc:date "Historical Safavid Era [تاريخ الإنتاج غير محدد]"@en ;
+    dc:date "[تاريخ الانتاج غير محدد - فترة صفوية]"@ar ;
+    dc:language "ar" ;
+    dc:format "275 folios (21 lines per page), arranged with catchwords (Taʿqībāt)"@en ;
+    dc:type "Islamic Traditions & Philosophical Jurisprudence (Hadith / 'Ilal)"@en ;
+    dc:identifier "MS-4433 (Sirsi a215742 / b126037 / BP193.25 .I25)" ;
+    dc:publisher "Majlis Parliament Library (MS 4433), Tehran in collaboration with Al-Abbas Holy Shrine Library"@en ;
+    dc:publisher "مكتبة مجلس الشورى : 4433، طهران بالتعاون مع مكتبة العتبة العباسية المقدسة"@ar ;
+    dc:bibliographicCitation "Al-Dharīʿah ilā Taṣānīf al-Shīʿah, Vol. 15, p. 313, no. 2005"@en ;
+    dc:rights <http://creativecommons.org/publicdomain/mark/1.0/> ;
+    
+    # Codicological Attributes from MARC21 340, 561, 562, 563
+    schema:material "Handmade paper, black carbon ink, red rubrication, nut-brown leather binding (Jild Jawzī)"@en ;
+    schema:material "ورق، حبر اسود، غلاف جلد جوزي، جداول ملونة، زخرفة ورقة أولى"@ar ;
+    schema:artform "Nastaliq Script with Illuminated Arch Headpiece (ʿUnwān)"@en ;
+    schema:artform "خط النستعليق مع ديباجة مذهبة وجداول تأطير وهوامش نسخ البدل"@ar ;
+    
+    ms:dimensions "275 folios, 21 lines per page (26.8 cm x 17.5 cm)" ;
+    ms:binding "Nut-Brown Leather Binding (غلاف : جلد، جوزي)"@en ;
+    ms:rulingTechnique "Ruled frames (Jadwal) with marginal textual variants (Nuskhat al-Badal) and catchwords"@en ;
+    
+    # Incipit & Explicit from MARC21 Field 500
+    ms:transcriptionArabic """أوله : الحمد لله رب العالمين ..قال الشيخ الفقيه ابو جعفر محمد بن علي بن الحسين بن موسى بن بابويه القمي رضي الله تعالى عنهم وجعل الجنة مثواهم. باب العلة التي من اجلها سميت السماء سماء و الدنيا دنيا و الاخرة آخرة... فإذا سبقت نطفة الرجل إلى نطفة المرأة إلى الرحم خرج يشبه الولد إلى أعمامه...
+
+آخره : ولا تطلع على سرنا أحدًا الا مؤمنا مستبصرا فإنك ان اذعت سرنا بليت في نفسك و مالك و اهلك و ولدك."""@ar ;
+    
+    ms:translationEnglish """Incipit: Praise be to God, Lord of the worlds... The Jurist and Scholar Shaykh Abū Jaʿfar Muḥammad ibn ʿAlī ibn al-Ḥusayn ibn Mūsā ibn Bābawayh al-Qummī (may God be pleased with them) said: Chapter on the reason why the sky is named samāʾ, this world dunyā, and the hereafter ākhirah... When the male fluid precedes the female fluid into the womb, the child resembles his paternal uncles...
+
+Explicit: And disclose not our secret to anyone except a discerning believer; for if you broadcast our secret, you shall be tested in yourself, your wealth, your family, and your children."""@en ;
+    
+    # Spatial Hotspots for Manuscript 3
+    ms:hasHotspot ms:HotspotIlalUnwan, ms:HotspotIlalIncipit, ms:HotspotIlalVariants, ms:HotspotIlalSeals .
+
+# ==============================================================================
+# SPATIAL HOTSPOTS FOR MANUSCRIPT 3
+# ==============================================================================
+
+ms:HotspotIlalUnwan a ms:SpatialHotspot ;
+    rdfs:label "Illuminated ʿUnwān Arch"@en ;
+    rdfs:label "ديباجة وزخرفة مذهبة"@ar ;
+    ms:targetFolio "Right Folio (Recto)"@en ;
+    ms:normalizedX 0.72 ;
+    ms:normalizedY 0.20 ;
+    ms:elevationZ 0.08 ;
+    dc:description "Dome-arched headpiece rendered in ultramarine blue, gold, and red floral arabesques."@en .
+
+ms:HotspotIlalIncipit a ms:SpatialHotspot ;
+    rdfs:label "Incipit & Author Sanad"@en ;
+    rdfs:label "سند الشيخ الصدوق وديباجة الباب"@ar ;
+    ms:targetFolio "Right Folio (Recto)"@en ;
+    ms:normalizedX 0.72 ;
+    ms:normalizedY 0.42 ;
+    ms:elevationZ 0.06 ;
+    dc:description "Opening transmission chain of Al-Shaykh al-Saduq on the metaphysical causes of creation."@en .
+
+ms:HotspotIlalVariants a ms:SpatialHotspot ;
+    rdfs:label "Marginal Textual Variants (Badal)"@en ;
+    rdfs:label "حواشي وتصحيحات نسخ البدل"@ar ;
+    ms:targetFolio "Left Folio Margin (Verso)"@en ;
+    ms:normalizedX 0.22 ;
+    ms:normalizedY 0.52 ;
+    ms:elevationZ 0.07 ;
+    dc:description "Critical scholarly collation notes in diagonal margins recording manuscript variations."@en .
+
+ms:HotspotIlalSeals a ms:SpatialHotspot ;
+    rdfs:label "Historical Seals (1106 & 1143 AH)"@en ;
+    rdfs:label "أختام التملك والوقف (1106 و 1143 هـ)"@ar ;
+    ms:targetFolio "Right Folio Outer Margin"@en ;
+    ms:normalizedX 0.90 ;
+    ms:normalizedY 0.35 ;
+    ms:elevationZ 0.05 ;
+    dc:description "Oval purchase seal of Muhsin ibn Muhammad Tahir (1143 AH) and square seal dated 1106 AH."@en .
