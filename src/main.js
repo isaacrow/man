@@ -12,6 +12,7 @@ class AppController {
       new RDFManuscriptParser(),
       new RDFManuscriptParser(),
       new RDFManuscriptParser(),
+      new RDFManuscriptParser(),
       new RDFManuscriptParser()
     ];
     this.speech = new ManuscriptSpeechEngine();
@@ -27,7 +28,8 @@ class AppController {
       'Al-Qabasat (Mir Damad)',
       'The Quran (Haydar Ali)',
       'Ilal al-Sharayi (Al-Saduq)',
-      'Kufic Quran (Zayn al-Abidin)'
+      'Kufic Quran (Zayn al-Abidin)',
+      'Archaic Naskh Quran'
     ];
 
     // DOM Elements
@@ -67,19 +69,20 @@ class AppController {
   }
 
   async init() {
-    console.log('Initializing Alqami 4-Target AR...');
+    console.log('Initializing Alqami 5-Target AR...');
     this._setupTabNavigation();
     this._setupModals();
     this._setupButtons();
 
-    // 1. Load all 4 MARC21 RDF datasets
+    // 1. Load all 5 MARC21 RDF datasets
     try {
       const baseUrl = import.meta.env.BASE_URL || './';
       await Promise.all([
         this.parsers[0].loadFromUrl(`${baseUrl}data/manuscript.ttl`),
         this.parsers[1].loadFromUrl(`${baseUrl}data/manuscript2.ttl`),
         this.parsers[2].loadFromUrl(`${baseUrl}data/manuscript3.ttl`),
-        this.parsers[3].loadFromUrl(`${baseUrl}data/manuscript4.ttl`)
+        this.parsers[3].loadFromUrl(`${baseUrl}data/manuscript4.ttl`),
+        this.parsers[4].loadFromUrl(`${baseUrl}data/manuscript5.ttl`)
       ]);
 
       this._displayTargetData(0);
@@ -150,7 +153,7 @@ class AppController {
 
       const { renderer, scene, camera, anchorGroups } = await this.arEngine.init();
 
-      // Create 3D Holograms for all 4 targets
+      // Create 3D Holograms for all 5 targets
       this.cardManagers = anchorGroups.map((group, index) => {
         const mgr = new ARCardManager(group);
         if (this.parsers[index] && this.parsers[index].metadata) {
@@ -334,7 +337,7 @@ class AppController {
 
     this.dom.audioGuideBtn.addEventListener('click', () => {
       const meta = this.parsers[this.currentTargetIndex]?.metadata;
-      const summary = `You are viewing ${meta?.title || 'the manuscript'}. Author or scribe: ${meta?.creator || ''}. Period: ${meta?.date || ''}. Holding repository: ${meta?.publisher || 'Majlis Parliament Library'}.`;
+      const summary = `You are viewing ${meta?.title || 'the manuscript'}. Author or scribe: ${meta?.creator || ''}. Period: ${meta?.date || ''}. Holding repository: ${meta?.publisher || 'Al-Abbas Holy Shrine Library'}.`;
       this.speech.toggle(summary, 'en');
     });
 

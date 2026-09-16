@@ -62,7 +62,8 @@ export class ManuscriptSimulator {
       `${baseUrl}manuscript.jpg`,
       `${baseUrl}manuscript2.jpg`,
       `${baseUrl}manuscript3.jpg`,
-      `${baseUrl}manuscript4.jpg`
+      `${baseUrl}manuscript4.jpg`,
+      `${baseUrl}manuscript5.jpg`
     ];
     const imageSrc = imageMap[targetIndex] || imageMap[0];
 

@@ -52,12 +52,18 @@ export class AREngine {
       pointLight.position.set(0, 1, 1);
       scene.add(pointLight);
 
-      // Support 4 targets: 0 (Al-Qabasat), 1 (Quran Haydar Ali), 2 (Ilal al-Sharayi'), 3 (Kufic Quran Zayn al-Abidin)
+      // Support 5 targets:
+      // 0: Al-Qabasat (Mir Damad)
+      // 1: Quran (Haydar Ali, Karbala)
+      // 2: Ilal al-Sharayi' (Al-Saduq)
+      // 3: Kufic Quran (Zayn al-Abidin)
+      // 4: Archaic Naskh Quran with Polychrome Vocalization
       this.anchors = [
         this.mindarThree.addAnchor(0),
         this.mindarThree.addAnchor(1),
         this.mindarThree.addAnchor(2),
-        this.mindarThree.addAnchor(3)
+        this.mindarThree.addAnchor(3),
+        this.mindarThree.addAnchor(4)
       ];
 
       this.anchors.forEach((anchor, index) => {

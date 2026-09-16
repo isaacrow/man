@@ -44,36 +44,35 @@ async function compileManuscripts() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  const img1Path = path.resolve(__dirname, '../manuscript.jpg');
-  const img2Path = path.resolve(__dirname, '../manuscript2.jpg');
-  const img3Path = path.resolve(__dirname, '../manuscript3.jpg');
-  const img4Path = path.resolve(__dirname, '../manuscript4.jpg');
+  const imgPaths = [
+    path.resolve(__dirname, '../manuscript.jpg'),
+    path.resolve(__dirname, '../manuscript2.jpg'),
+    path.resolve(__dirname, '../manuscript3.jpg'),
+    path.resolve(__dirname, '../manuscript4.jpg'),
+    path.resolve(__dirname, '../manuscript5.jpg')
+  ];
 
-  console.log(`Loading Target 1: ${img1Path}...`);
-  const image1 = await loadImage(img1Path);
-
-  console.log(`Loading Target 2: ${img2Path}...`);
-  const image2 = await loadImage(img2Path);
-
-  console.log(`Loading Target 3: ${img3Path}...`);
-  const image3 = await loadImage(img3Path);
-
-  console.log(`Loading Target 4: ${img4Path}...`);
-  const image4 = await loadImage(img4Path);
+  const loadedImages = [];
+  for (let i = 0; i < imgPaths.length; i++) {
+    console.log(`Loading Target ${i + 1}: ${imgPaths[i]}...`);
+    const fileBuf = fs.readFileSync(imgPaths[i]);
+    const img = await loadImage(fileBuf);
+    loadedImages.push(img);
+  }
 
   const compiler = new NodeCompiler();
-  console.log('Compiling 4 manuscripts into multi-target targets.mind descriptor...');
+  console.log('Compiling 5 manuscripts into multi-target targets.mind descriptor...');
 
-  await compiler.compileImageTargets([image1, image2, image3, image4], (progress) => {
+  await compiler.compileImageTargets(loadedImages, (progress) => {
     process.stdout.write(`\rProgress: ${progress.toFixed(1)}%`);
   });
 
-  console.log('\nExporting 4-target buffer...');
+  console.log('\nExporting 5-target buffer...');
   const buffer = compiler.exportData();
 
   const outputPath = path.join(outputDir, 'targets.mind');
   fs.writeFileSync(outputPath, Buffer.from(buffer));
-  console.log(`Successfully saved 4-target descriptor to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
+  console.log(`Successfully saved 5-target descriptor to ${outputPath} (${(buffer.byteLength / 1024).toFixed(1)} KB)`);
 
   const singlePath = path.join(outputDir, 'manuscript.mind');
   fs.writeFileSync(singlePath, Buffer.from(buffer));

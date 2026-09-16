@@ -1,0 +1,100 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <http://schema.org/> .
+@prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix edm: <http://www.europeana.eu/schemas/edm/> .
+@prefix ms: <https://w3id.org/manuscript-ar/ontology#> .
+
+# ==============================================================================
+# MANUSCRIPT 5: ARCHAIC NASKH QUR'AN WITH POLYCHROME VOCALIZATION (6TH-8TH C. AH)
+# ==============================================================================
+
+<https://w3id.org/manuscript-ar/item/MS-QURAN-ARCHAIC-NASKH> a schema:Manuscript, crm:E22_Human-Made_Object, edm:ProvidedCHO ;
+    # Dublin Core Metadata from Full Catalog Record
+    dc:title "Illuminated Holy Qur'an in Archaic Naskh with Polychrome Vocalization"@en ;
+    dc:title "مصحف شريف بخط النسخ العتيق والضبط متعدد الألوان (سورة الفاتحة والبقرة)"@ar ;
+    dc:creator "Anonymous Master Calligrapher (Middle Islamic Era / 6th-8th C. AH)"@en ;
+    dc:creator "خطاط متمرس مجهول (العصر الوسيط / القرن 6-8 الهجري)"@ar ;
+    dc:date "6th-8th Century AH [c. 550-750 AH / 1150-1350 CE]"@en ;
+    dc:date "[550-750] هـ. = [1150-1350 م]"@ar ;
+    dc:language "ar" ;
+    dc:format "Manuscript codex, 20-21 lines per page, single column framed with ruled border, catchwords (Taʿqībāt)"@en ;
+    dc:type "Illuminated Sacred Qur'an Codex (Muṣḥaf)"@en ;
+    dc:identifier "MS-QURAN-KA-9821 (Al-Abbas Holy Shrine Library / IQ-KaCCS)" ;
+    dc:publisher "Al-Abbas Holy Shrine Library & Manuscript Center (مكتبة ودار مخطوطات العتبة العباسية المقدسة)"@en ;
+    dc:publisher "مكتبة ودار مخطوطات العتبة العباسية المقدسة، كربلاء"@ar ;
+    dc:spatial "Mesopotamian / Eastern Islamic Regional School (العراق والشام وخراسان)"@en ;
+    dc:rights <http://creativecommons.org/publicdomain/mark/1.0/> ;
+    
+    # Codicological Attributes (Paper, Ink, Vocalization, Layout)
+    schema:material "Handmade burnished rag paper (Waraq Baghdadi/Mansuri), carbon black ink, cinnabar red ink, verdigris green dots, 24K shell gold illumination"@en ;
+    schema:material "ورق مشرقي مصقول، حبر كربوني اسود، حبر شنجرفي احمر، نقط خضراء لوصل الهمزات، تذهيب بماء الذهب"@ar ;
+    schema:artform "Archaic Naskh Script with Cartouche Unwān & Polychrome Orthography (خط النسخ العتيق مع ضبط متعدد الألوان)"@en ;
+    schema:artform "خط النسخ العتيق ذو الامتدادات الأفقية الصارمة، مع ترويسات سور مذهبة وعلامات إعجام وضبط ملونة"@ar ;
+    
+    ms:dimensions "Folio size: 28.5 cm x 20.2 cm (Written area: 22.0 cm x 14.5 cm)" ;
+    ms:binding "Historical blind-tooled Islamic leather flap binding (جلد إسلامي أصيل ذو لسان)"@en ;
+    ms:rulingTechnique "Double ruled frame borders (Jadwal) in black and red ink, 20 to 21 lines per page with catchwords (Taʿqībāt)"@en ;
+    
+    # Incipit & Transcription of Page 1
+    ms:transcriptionArabic """بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ • صَلَّى اللهُ عَلَى سَيِّدِنَا مُحَمَّدٍ وَآلِهِ وَسَلَّمَ تَسْلِيمًا كَثِيرًا
+
+[لوحة مذهبة مؤطرة: سورة الفاتحة مكية • بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ]
+الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ • الرَّحْمَنِ الرَّحِيمِ • مَالِكِ يَوْمِ الدِّينِ • إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ • اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ • صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ
+
+[لوحة مذهبة مؤطرة: سورة البقرة • بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ]
+الم • ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِلْمُتَّقِينَ • الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ • وَالَّذِينَ يُؤْمِنُونَ بِمَا أُنْزِلَ إِلَيْكَ وَمَا أُنْزِلَ مِنْ قَبْلِكَ وَبِالْآخِرَةِ هُمْ يُوقِنُونَ • أُولَئِكَ عَلَى هُدًى مِنْ رَبِّهِمْ وَأُولَئِكَ هُمُ الْمُفْلِحُونَ • إِنَّ الَّذِينَ كَفَرُوا سَوَاءٌ عَلَيْهِمْ أَأَنْذَرْتَهُمْ أَمْ لَمْ تُنْذِرْهُمْ لَا يُؤْمِنُونَ..."""@ar ;
+    
+    ms:translationEnglish """In the Name of God, the Most Gracious, the Most Merciful. May God send abundant blessings and peace upon our Master Muhammad and his Purified Family.
+
+[Illuminated Header Cartouche: Surah Al-Fatihah, Meccan • In the Name of God, the Most Gracious, the Most Merciful]
+All praise is due to God, Lord of all the worlds. The Most Gracious, the Most Merciful. Master of the Day of Judgment. You alone we worship, and You alone we ask for help. Guide us to the straight path—the path of those upon whom You have bestowed favor, not of those who have evoked Your anger, nor of those who are astray.
+
+[Illuminated Header Cartouche: Surah Al-Baqarah • In the Name of God, the Most Gracious, the Most Merciful]
+Alif, Lam, Meem. This is the Book about which there is no doubt, a guidance for those conscious of God—who believe in the unseen, establish prayer, and spend out of what We have provided for them; and who believe in what has been revealed to you and what was revealed before you, and of the Hereafter they are certain. Those are upon guidance from their Lord, and it is those who are successful..."""@en ;
+    
+    # Spatial Hotspots for Manuscript 5
+    ms:hasHotspot ms:Hotspot5UnwanCartouche, ms:Hotspot5PolychromeDabt, ms:Hotspot5ArchaicCalligraphy, ms:Hotspot5GoldRosette .
+
+# ==============================================================================
+# SPATIAL HOTSPOTS FOR MANUSCRIPT 5
+# ==============================================================================
+
+ms:Hotspot5UnwanCartouche a ms:SpatialHotspot ;
+    rdfs:label "Illuminated Surah Cartouche (ʿUnwān)"@en ;
+    rdfs:label "ترويسة السورة المذهبة المؤطرة"@ar ;
+    ms:targetFolio "Page 1 Upper Cartouche"@en ;
+    ms:normalizedX 0.48 ;
+    ms:normalizedY 0.12 ;
+    ms:elevationZ 0.08 ;
+    dc:description "Pointed oblong cartouche in vermilion, black, and gold arabesque designating 'Sūrat al-Fātiḥah Makkiyyah'."@en .
+
+ms:Hotspot5PolychromeDabt a ms:SpatialHotspot ;
+    rdfs:label "Polychrome Vocalization (Nuqat & Harakat)"@en ;
+    rdfs:label "الضبط متعدد الألوان (الحركات والنقط)"@ar ;
+    ms:targetFolio "Page 1 Interlinear Diacritics"@en ;
+    ms:normalizedX 0.65 ;
+    ms:normalizedY 0.20 ;
+    ms:elevationZ 0.06 ;
+    dc:description "Red ink for vowels and tanwin; green dots marking Hamzat al-Wasl; yellow/orange markings for elongation (Madd)."@en .
+
+ms:Hotspot5ArchaicNaskh a ms:SpatialHotspot ;
+    rdfs:label "Archaic Transitional Naskh Script"@en ;
+    rdfs:label "خط النسخ العتيق ذو الامتدادات الصارمة"@ar ;
+    ms:targetFolio "Page 1 Central Lines (Surah Al-Baqarah)"@en ;
+    ms:normalizedX 0.50 ;
+    ms:normalizedY 0.46 ;
+    ms:elevationZ 0.07 ;
+    dc:description "Monumental early Naskh calligraphy characterized by straight vertical hastae and elongated horizontal letterforms."@en .
+
+ms:Hotspot5GoldRosette a ms:SpatialHotspot ;
+    rdfs:label "Gold Aya Rosette & Marginal Medallion"@en ;
+    rdfs:label "فاصلة آية مذهبة وشمسة تزيينية"@ar ;
+    ms:targetFolio "Page 1 Line 4 & Margins"@en ;
+    ms:normalizedX 0.82 ;
+    ms:normalizedY 0.23 ;
+    ms:elevationZ 0.08 ;
+    dc:description "Finely executed circular gilt rosettes with red central dots marking verse ends, and marginal palmettes for deciles."@en .
